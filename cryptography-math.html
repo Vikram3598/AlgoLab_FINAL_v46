@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cryptography & Mathematical Algorithms | AlgoLab</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#060912;--card:#0a0a2e;--border:#1f2833;--accent:#00d4ff;--green:#48d0b0;--red:#ff6b6b;--gold:#f1c40f;--purple:#9b59b6;--pink:#e84393;--text:#e0e0e0;--dim:#667080}
+body{background:var(--bg);color:var(--text);font-family:Inter,"Segoe UI",Arial,sans-serif;min-height:100vh;overflow-x:hidden}
+.bg{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;overflow:hidden}
+.bg .orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.12;animation:of 22s ease-in-out infinite}
+.bg .orb:nth-child(1){width:400px;height:400px;background:var(--accent);top:-100px;left:-100px}
+.bg .orb:nth-child(2){width:350px;height:350px;background:var(--purple);bottom:-100px;right:-100px;animation-delay:-8s}
+.bg .orb:nth-child(3){width:300px;height:300px;background:var(--gold);top:40%;left:55%;animation-delay:-15s}
+@keyframes of{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(70px,-50px) scale(1.15)}66%{transform:translate(-50px,70px) scale(.85)}}
+.header{position:relative;z-index:10;background:rgba(10,10,46,.92);backdrop-filter:blur(10px);padding:14px 25px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.logo{font-size:1.3rem;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sub{color:var(--dim);font-size:.75rem}
+.main-home-link{color:var(--accent);text-decoration:none;font-size:13px;font-weight:700;white-space:nowrap}.main-home-link:hover{text-decoration:underline}
+.back-btn{padding:7px 16px;background:rgba(0,212,255,.1);border:1px solid var(--accent);border-radius:6px;color:var(--accent);font-size:.8rem;cursor:pointer;transition:all .2s;display:none}
+.back-btn:hover{background:rgba(0,212,255,.2);transform:translateX(-3px)}
+.back-btn.show{display:block}
+.home{position:relative;z-index:1;max-width:980px;margin:0 auto;padding:50px 20px;text-align:center}
+.home h1{font-size:2.2rem;margin-bottom:8px;background:linear-gradient(135deg,var(--accent),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.home > .tag{color:var(--dim);font-size:.95rem;margin-bottom:40px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:18px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:26px;cursor:pointer;transition:all .3s;position:relative;overflow:hidden;text-align:left}
+.card::before{content:'';position:absolute;top:0;left:0;width:100%;height:3px;background:linear-gradient(90deg,var(--accent),var(--purple));transform:scaleX(0);transition:transform .3s;transform-origin:left}
+.card:hover{transform:translateY(-6px);border-color:var(--accent);box-shadow:0 12px 40px rgba(0,212,255,.15)}
+.card:hover::before{transform:scaleX(1)}
+.card .ico{font-size:2.4rem;margin-bottom:12px}
+.card h3{color:var(--accent);font-size:1.08rem;margin-bottom:8px}
+.card p{color:var(--dim);font-size:.8rem;line-height:1.6;margin-bottom:12px}
+.tags{display:flex;gap:8px;flex-wrap:wrap}
+.tag{font-size:.65rem;padding:4px 10px;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.22);border-radius:12px;color:var(--accent)}
+.tag.p{background:rgba(155,89,182,.12);border-color:rgba(155,89,182,.25);color:var(--purple)}
+.tag.r{background:rgba(255,107,107,.1);border-color:rgba(255,107,107,.2);color:var(--red)}
+.tag.g{background:rgba(72,208,176,.1);border-color:rgba(72,208,176,.2);color:var(--green)}
+.algo{position:relative;z-index:1;max-width:1150px;margin:0 auto;padding:20px}
+.panel{display:none}
+.panel.on{display:block}
+.algo-head{text-align:center;margin-bottom:18px}
+.algo-head h2{color:var(--accent);font-size:1.4rem;margin-bottom:4px}
+.algo-head p{color:var(--dim);font-size:.85rem}
+.viz{background:rgba(10,10,46,.7);border:1px solid var(--border);border-radius:16px;padding:22px;min-height:300px;margin-bottom:14px;position:relative;overflow:hidden;backdrop-filter:blur(5px)}
+.viz::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--accent),transparent);opacity:.5}
+.legend{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:12px}
+.lg{display:flex;align-items:center;gap:6px;font-size:.66rem;color:var(--dim)}
+.lg i{width:12px;height:12px;border-radius:3px;display:inline-block;border:1px solid rgba(255,255,255,.2)}
+.controls{display:flex;gap:10px;justify-content:center;margin-bottom:12px;flex-wrap:wrap;align-items:center}
+.btn{padding:10px 24px;border:none;border-radius:8px;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .2s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 4px 15px rgba(0,0,0,.3)}
+.btn:active{transform:translateY(0)}
+.b-play{background:linear-gradient(135deg,var(--accent),#0984e3);color:#060912}
+.b-step{background:rgba(0,212,255,.1);color:var(--accent);border:1px solid var(--accent)}
+.b-reset{background:rgba(255,107,107,.1);color:var(--red);border:1px solid var(--red)}
+.speed{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:6px 14px}
+.speed label{font-size:.7rem;color:var(--dim);text-transform:uppercase;letter-spacing:1px}
+.speed input[type=range]{width:80px;accent-color:var(--accent)}
+.speed .val{font-size:.75rem;color:var(--accent);font-weight:600;min-width:35px}
+.progress-bar{height:4px;background:var(--border);border-radius:2px;margin-bottom:12px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--purple));border-radius:2px;transition:width .3s;width:0%}
+.status{text-align:center;color:var(--dim);font-size:.88rem;min-height:24px;margin-bottom:12px;font-weight:500}
+.status.ok{color:var(--green)}.status.hl{color:var(--accent)}.status.err{color:var(--red)}
+.desc{background:rgba(15,15,39,.8);border:1px solid var(--border);border-radius:10px;padding:14px 18px;font-size:.78rem;color:var(--dim);line-height:1.7}
+.desc b{color:var(--accent)}
+.desc .cx{display:inline-block;margin-top:6px;padding:3px 10px;background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.18);border-radius:12px;color:var(--accent);font-size:.72rem;font-family:monospace}
+.result{background:rgba(72,208,176,.06);border:1px solid var(--green);border-radius:10px;padding:14px;text-align:center;margin-top:12px;font-size:1rem;color:var(--green);font-weight:700;display:none;animation:su .4s ease}
+.result.bad{border-color:var(--red);color:var(--red);background:rgba(255,107,107,.06)}
+.result.show{display:block}
+@keyframes su{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.log{max-height:150px;overflow-y:auto;padding:8px 10px;background:rgba(15,15,39,.6);border-radius:8px;margin-top:12px}
+.log-line{font-size:.74rem;color:var(--dim);padding:3px 0;border-bottom:1px solid rgba(31,40,51,.5);font-family:monospace}
+.log-line:last-child{border:none}
+.log-line.hl{color:var(--accent)}.log-line.ok{color:var(--green)}.log-line.bad{color:var(--red)}
+.sqwrap{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+.sq{min-width:34px;height:34px;padding:0 8px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.82rem;font-family:Consolas,monospace;background:rgba(15,15,39,.9);border:1.5px solid var(--border);color:var(--dim);transition:all .25s;animation:pop .2s}
+.sq.done{border-color:rgba(72,208,168,.5);color:rgba(72,208,168,.75)}
+.sq.cur{border-color:var(--accent);color:var(--accent);background:rgba(0,212,255,.12);transform:scale(1.12);box-shadow:0 0 10px rgba(0,212,255,.3)}
+.sq.op{border-color:var(--purple);color:var(--purple);background:rgba(155,89,182,.08);font-size:.7rem}
+@keyframes pop{from{transform:scale(.7);opacity:0}to{transform:scale(1);opacity:1}}
+.stats{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+.stat{padding:6px 14px;background:rgba(15,15,39,.8);border:1px solid var(--border);border-radius:8px;font-size:.72rem;color:var(--dim)}
+.stat b{color:var(--accent);font-size:.9rem;margin-left:4px}
+.err-msg{color:var(--red);text-align:center;padding:30px;font-size:.9rem}
+.confetti{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1000;overflow:hidden}
+.confetti .pc{position:absolute;top:-10px;animation:cf linear forwards}
+@keyframes cf{0%{top:-10px;opacity:1;transform:rotate(0)}100%{top:110%;opacity:0;transform:rotate(720deg)}}
+/* gcd */
+.gbarwrap{max-width:720px;margin:14px auto}
+.grow{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.glab{width:70px;font-family:Consolas,monospace;color:var(--dim);font-size:.85rem;text-align:right}
+.gtrack{flex:1;height:38px;background:rgba(15,15,39,.8);border:1px solid var(--border);border-radius:8px;overflow:hidden;position:relative}
+.gbar{height:100%;border-radius:7px;transition:width .5s ease;display:flex;align-items:center;justify-content:flex-end;padding-right:10px;font-family:Consolas,monospace;font-weight:800;color:#060912;font-size:.95rem}
+.gbar.ba{background:linear-gradient(90deg,var(--gold),#e67e22)}
+.gbar.bb{background:linear-gradient(90deg,var(--accent),#6c5ce7)}
+.eqbig{text-align:center;font-family:Consolas,monospace;font-size:1.35rem;color:var(--gold);min-height:40px;letter-spacing:.5px;animation:pop .3s}
+/* sieve */
+.sgrid{display:grid;grid-template-columns:repeat(10,54px);gap:6px;justify-content:center}
+.cel{width:54px;height:46px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.92rem;background:#1a1d3e;border:1.5px solid #34495e;color:#9aa3b5;transition:all .25s;animation:pop .2s;font-family:Consolas,monospace}
+.cel.one{background:#241a2e;border-color:#4a3060;color:#8a6aa0;text-decoration:line-through}
+.cel.cx{background:rgba(255,107,107,.14);border-color:#7a3030;color:#a05555;text-decoration:line-through}
+.cel.curp{background:rgba(241,196,15,.3);border-color:var(--gold);color:var(--gold);transform:scale(1.1);box-shadow:0 0 12px rgba(241,196,15,.4)}
+.cel.hit{background:rgba(255,107,107,.4);border-color:var(--red);color:#fff;transform:scale(1.15);box-shadow:0 0 14px rgba(255,107,107,.5)}
+.cel.prime{background:rgba(72,208,168,.3);border-color:var(--green);color:var(--green)}
+/* modexp */
+.bits{display:flex;gap:6px;justify-content:center;margin-bottom:16px}
+.bit{width:50px;padding:8px 0;border-radius:8px;text-align:center;background:rgba(15,15,39,.9);border:1.5px solid var(--border);font-family:Consolas,monospace;transition:all .25s;animation:pop .2s}
+.bit .bv{font-size:1.3rem;font-weight:800;color:#9aa3b5}
+.bit .bi{font-size:.55rem;color:var(--dim);letter-spacing:1px;margin-top:2px}
+.bit.done{border-color:rgba(72,208,168,.5)}.bit.done .bv{color:rgba(72,208,168,.75)}
+.bit.cur{border-color:var(--accent);background:rgba(0,212,255,.12);transform:scale(1.12);box-shadow:0 0 12px rgba(0,212,255,.35)}.bit.cur .bv{color:var(--accent)}
+.lane{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-bottom:14px}
+.lbox{padding:12px 22px;border-radius:10px;background:rgba(15,15,39,.85);border:1.5px solid var(--border);text-align:center;min-width:150px;transition:all .3s;animation:pop .25s}
+.lbox .ll{font-size:.62rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--dim)}
+.lbox .lv{font-family:Consolas,monospace;font-size:1.3rem;font-weight:800;color:var(--gold);margin-top:4px;word-break:break-all}
+.lbox.acc{border-color:var(--green)}.lbox.acc .lv{color:var(--green)}
+.lbox.mid{border-color:var(--accent)}.lbox.mid .lv{color:var(--accent)}
+.formula{text-align:center;font-family:Consolas,monospace;font-size:1.02rem;color:var(--text);min-height:34px;animation:pop .3s}
+.formula .mod{color:var(--purple)}
+/* rsa */
+.klines{max-width:760px;margin:10px auto}
+.kline{font-family:Consolas,monospace;font-size:.95rem;padding:7px 12px;border-bottom:1px dashed var(--border);animation:pop .3s;display:flex;justify-content:space-between;gap:10px}
+.kline .kv{color:var(--gold);font-weight:700}
+.kline.cy .kv{color:var(--accent)}
+.keyrow{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+.kbox{padding:12px 22px;border-radius:10px;text-align:center;animation:pop .35s;min-width:210px}
+.kbox.pub{background:rgba(241,196,15,.07);border:1.5px solid var(--gold)}
+.kbox.prv{background:rgba(0,212,255,.07);border:1.5px solid var(--accent)}
+.kbox .kt{font-size:.62rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--dim);margin-bottom:6px}
+.kbox .kv{font-family:Consolas,monospace;font-size:1rem;font-weight:700}
+.kbox.pub .kv{color:var(--gold)}.kbox.prv .kv{color:var(--accent)}
+.flow{display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;margin-top:16px}
+.fbox{padding:10px 18px;border-radius:10px;background:rgba(15,15,39,.85);border:1.5px solid var(--border);text-align:center;animation:pop .3s;min-width:96px}
+.fbox .fl{font-size:.58rem;text-transform:uppercase;letter-spacing:1.2px;color:var(--dim)}
+.fbox .fv{font-family:Consolas,monospace;font-size:1.1rem;font-weight:800;color:var(--text);margin-top:3px}
+.fbox.ok{border-color:var(--green)}.fbox.ok .fv{color:var(--green)}
+.fbox.hl{border-color:var(--gold)}.fbox.hl .fv{color:var(--gold)}
+.far{color:var(--gold);font-size:1.3rem;font-weight:800}
+/* aes */
+.aeswrap{display:flex;gap:26px;justify-content:center;align-items:flex-start;flex-wrap:wrap}
+.aesgrid{display:grid;grid-template-columns:repeat(4,76px);gap:6px}
+.acell{height:72px;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#1a1d3e;border:1.5px solid #34495e;transition:all .3s;animation:pop .25s}
+.acell .bv{font-family:Consolas,monospace;font-size:1.15rem;font-weight:800}
+.acell .bi{font-size:.55rem;color:var(--dim);margin-top:2px}
+.acell.chg{border-color:var(--green);box-shadow:0 0 10px rgba(72,208,168,.4);animation:pulse .5s}
+@keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.09)}100%{transform:scale(1)}}
+.aesmeta{min-width:320px;max-width:430px}
+.aesphase{padding:10px 16px;border-radius:10px;background:rgba(0,212,255,.07);border:1.5px solid var(--accent);text-align:center;font-weight:700;color:var(--accent);margin-bottom:12px;animation:pop .25s;font-size:.92rem}
+.rkrow{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;margin-top:8px}
+.rkc{padding:5px 0;border-radius:5px;background:rgba(15,15,39,.85);border:1px solid var(--border);font-family:Consolas,monospace;font-size:.68rem;text-align:center;color:var(--dim);animation:pop .2s}
+.aesct{margin-top:14px;padding:11px 14px;border-radius:10px;background:rgba(15,15,39,.85);border:1.5px solid var(--border);font-family:Consolas,monospace;font-size:.85rem;word-break:break-all;text-align:center;min-height:44px}
+.aesct .lbl{display:block;font-size:.6rem;color:var(--dim);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px;font-family:Inter,"Segoe UI",Arial,sans-serif}
+.aesct.good{border-color:var(--green)}.aesct.good .h{color:var(--green)}
+/* hash */
+.hashcols{display:flex;gap:18px;justify-content:center;flex-wrap:wrap}
+.hcol{flex:1;min-width:300px;max-width:470px;padding:14px;border-radius:12px;background:rgba(15,15,39,.6);border:1.5px solid var(--border);transition:.3s}
+.hcol.act{border-color:var(--accent);box-shadow:0 0 18px rgba(0,212,255,.12)}
+.hcol h4{font-size:.82rem;color:var(--accent);text-align:center;margin-bottom:10px;letter-spacing:1px}
+.regs{display:flex;gap:7px;justify-content:center;flex-wrap:wrap}
+.reg{min-width:96px;padding:7px 6px;border-radius:8px;background:#1a1d3e;border:1.5px solid #34495e;text-align:center;transition:.25s;animation:pop .2s}
+.reg .rl{font-size:.55rem;letter-spacing:1.5px;color:var(--dim)}
+.reg .rv{font-family:Consolas,monospace;font-size:.8rem;font-weight:700;color:var(--gold);margin-top:2px;word-break:break-all}
+.reg.upd{border-color:var(--green);background:rgba(72,208,168,.12)}
+.reg.idle{opacity:.32}
+.inpbar{text-align:center;font-family:Consolas,monospace;font-size:.95rem;color:var(--gold);margin-bottom:14px;animation:pop .3s}
+.cur5{text-align:center;font-family:Consolas,monospace;font-size:.82rem;color:var(--text);min-height:36px;margin-top:14px;padding:8px;background:rgba(15,15,39,.7);border-radius:8px;animation:pop .25s}
+.outs5{display:flex;flex-direction:column;gap:8px;margin-top:14px;align-items:stretch}
+.hrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:9px 12px;background:rgba(15,15,39,.85);border:1.5px solid var(--border);border-radius:9px;animation:pop .3s}
+.hrow .hn{font-size:.62rem;text-transform:uppercase;letter-spacing:1.2px;color:var(--dim);width:74px}
+.hrow .hv{font-family:Consolas,monospace;font-size:.78rem;word-break:break-all;flex:1;color:var(--text)}
+.hrow.good{border-color:var(--green)}.hrow.good .hv{color:var(--green)}
+.hrow.badv{border-color:var(--red)}.hrow.badv .hv{color:var(--red)}
+.hrow .hv.pending{color:var(--dim)}
+@media(max-width:600px){.home h1{font-size:1.5rem}.cards{grid-template-columns:1fr}.viz{padding:14px}.btn{padding:8px 16px;font-size:.78rem}.sgrid{grid-template-columns:repeat(10,30px);gap:4px}.cel{width:30px;height:32px;font-size:.7rem}.aesgrid{grid-template-columns:repeat(4,64px)}.acell{height:60px}}
+
+/* AlgoLab shared typography: match index.html; code remains intentionally monospace. */
+html, body, button, input, select, textarea { font-family: Inter, "Segoe UI", Arial, sans-serif; }
+body { font-size: 14px; line-height: 1.45; }
+button, input, select { font-size: 13px; }
+.desc, .learning-card p { font-size: 13px; line-height: 1.65; }
+.learning-lab { margin-top: 18px; }
+.learning-head { display:flex; align-items:center; justify-content:space-between; gap:18px; margin-bottom:12px; padding:16px 18px; border:1px solid var(--border); border-radius:14px; background:rgba(10,10,46,.92); }
+.learning-head .eyebrow { font-size:11px; letter-spacing:.14em; font-weight:800; color:var(--accent); }
+.learning-head h2 { font-size:22px; line-height:1.25; margin:4px 0 0; color:var(--text); background:none; -webkit-text-fill-color:initial; }
+.code-select { display:flex; align-items:center; gap:8px; font-size:13px; color:var(--dim); font-weight:700; white-space:nowrap; }
+.code-select select { background:var(--bg); color:var(--text); border:1px solid var(--border); border-radius:7px; padding:8px 10px; font-size:13px; }
+.learning-grid { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:12px; }
+.learning-card { min-width:0; border:1px solid var(--border); border-radius:14px; background:rgba(10,10,46,.86); padding:16px; color:var(--text); }
+.learning-card h3 { font-size:16px; line-height:1.35; margin:0 0 7px; color:var(--accent); }
+.learning-card p { color:#b8c2d0; overflow-wrap:anywhere; }
+.learning-tags { display:flex; flex-wrap:wrap; gap:6px; margin-top:4px; }
+.learning-tags span { font-size:12px; padding:5px 8px; border:1px solid rgba(0,212,255,.25); background:rgba(0,212,255,.07); color:var(--accent); border-radius:7px; }
+.code-window { overflow:auto; max-width:100%; border:1px solid #26394d; border-radius:9px; background:#07111d; padding:12px; }
+.code-window pre { margin:0; white-space:pre; overflow-x:auto; tab-size:2; }
+.code-window code { font:12px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace; color:#e5edf5; }
+.code-note { font-size:12px!important; color:var(--dim)!important; margin:10px 0 0!important; }
+@media(max-width:850px){ .learning-grid{grid-template-columns:1fr}.learning-head{align-items:flex-start} }
+@media(max-width:600px){ .learning-head{flex-direction:column}.learning-head h2{font-size:19px}.code-select{white-space:normal;flex-wrap:wrap}.learning-card{padding:13px} }
+body[data-theme="light"] .learning-card, body[data-theme="light"] .learning-head { background:#fff; color:#263445; border-color:#c1cfdb; }
+body[data-theme="light"] .learning-card p { color:#40556a; }
+</style>
+
+<style id="shared-shell-style">
+/* Shared navigation shell; the original educational canvas and simulation styles remain page-specific. */
+.shared-shell{min-height:100vh;display:flex;align-items:stretch;background:var(--ui-bg,#07111d);color:var(--ui-text,#f5f7fa)}
+.shared-sidebar{width:255px;flex:0 0 255px;background:#081523;border-right:1px solid var(--ui-line,#24425d);padding:24px 16px;display:flex;flex-direction:column;gap:12px;min-height:100vh;position:sticky;top:0;height:100vh;overflow:auto;z-index:100}
+.shared-brand{display:flex;gap:12px;align-items:center;padding:4px 8px 20px;text-decoration:none;color:inherit}
+.shared-brand-mark{width:40px;height:40px;flex:0 0 40px;border-radius:12px;background:linear-gradient(135deg,#22d3ee,#2385f2);display:grid;place-items:center;font-size:22px;font-weight:800;color:#07111d}
+.shared-brand b{display:block;font-size:19px;line-height:1.2;color:var(--ui-text,#f5f7fa)}
+.shared-brand small{display:block;font-size:11px;color:var(--ui-muted,#8ea6bb);margin-top:3px}
+.shared-home{display:block;text-decoration:none;padding:10px 12px;border:1px solid var(--ui-line,#24425d);border-radius:9px;color:var(--ui-muted,#8ea6bb);font-size:13px}
+.shared-home:hover{color:var(--ui-text,#f5f7fa);border-color:var(--ui-accent,#22d3ee)}
+.shared-side-title{font-size:10px;letter-spacing:1.5px;color:var(--ui-muted,#8ea6bb);font-weight:800;padding:8px 10px 2px}
+.shared-nav{display:flex;flex-direction:column;gap:3px}
+.shared-nav .nav-item{display:block;text-decoration:none;width:100%;border:1px solid transparent;background:transparent;color:var(--ui-muted,#8ea6bb);text-align:left;padding:9px 11px;border-radius:9px;margin:0;font:600 12px/1.35 var(--ui-font,Inter,"Segoe UI",Arial,sans-serif)}
+.shared-nav .nav-item:hover{background:var(--ui-panel-2,#102a43);color:var(--ui-text,#f5f7fa)}
+.shared-nav .nav-item.active{background:var(--ui-panel-2,#102a43);border-color:var(--ui-line,#24425d);color:var(--ui-text,#f5f7fa)}
+.shared-nav .nav-item small{display:block;color:var(--ui-muted,#8ea6bb);font-size:10px;font-weight:400;margin-top:3px}
+.shared-theme{width:100%;min-height:38px;border:1px solid var(--ui-line,#24425d);border-radius:9px;background:var(--ui-panel-2,#102a43);color:var(--ui-text,#f5f7fa);font:700 12px/1.2 var(--ui-font,Inter,"Segoe UI",Arial,sans-serif);padding:9px 11px;text-align:left;cursor:pointer}
+.shared-note{margin-top:auto;border:1px solid var(--ui-line,#24425d);background:var(--ui-panel,#0b1b2b);padding:12px;border-radius:12px;color:var(--ui-muted,#8ea6bb);font-size:12px}
+.shared-note b{color:var(--ui-accent,#22d3ee)}.shared-note p{margin:6px 0 0;font-size:12px;line-height:1.5}
+.shared-main{flex:1;min-width:0;width:calc(100% - 255px);padding:20px 26px;}
+body[data-theme="light"] .shared-shell{background:var(--ui-bg,#f2f6fa);color:var(--ui-text,#102033)}
+body[data-theme="light"] .shared-sidebar{background:#fff;border-color:var(--ui-line,#b7c7d6)}
+body[data-theme="light"] .shared-brand b{color:#152235}
+body[data-theme="light"] .shared-home,body[data-theme="light"] .shared-nav .nav-item{color:#465d73}
+body[data-theme="light"] .shared-nav .nav-item.active{background:#edf3f7;color:#152235;border-color:#b7c7d6}
+body[data-theme="light"] .shared-theme{background:#f7fafc;color:#102033;border-color:#b7c7d6}
+@media(max-width:900px){.shared-shell{display:block}.shared-sidebar{position:relative;width:100%;height:auto;min-height:0;max-height:none;overflow:visible;padding:12px;gap:8px;border-right:0;border-bottom:1px solid var(--ui-line,#24425d)}.shared-brand{padding:2px 4px 8px}.shared-nav{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:5px}.shared-note{display:none}.shared-main{width:100%;padding:14px}}
+</style>
+<link rel="stylesheet" href="design-system.css">
+<link rel="stylesheet" href="enhance.css"></head>
+<body data-theme="dark">
+<div class="shared-shell" id="sharedAlgoLabShell">
+<aside class="shared-sidebar" aria-label="AlgoLab navigation">
+<a class="shared-brand" href="index.html"><span class="shared-brand-mark">A</span><span><b>AlgoLab</b><small>INTERACTIVE LEARNING STUDIO</small></span></a>
+<a class="shared-home" href="index.html">← All learning labs</a>
+<div class="shared-side-title">LEARNING LABS</div>
+<nav class="shared-nav" id="sharedAlgoLabNav" aria-label="Learning labs"><a class="nav-item" href="sorting.html" ><span>Sorting Algorithms</span><small>Core algorithm lab</small></a><a class="nav-item" href="searching.html"><span>Searching Algorithms</span><small>Array, tree and graph search</small></a><a class="nav-item" href="greedy.html" ><span>Greedy Algorithms</span><small>Optimization strategies</small></a><a class="nav-item" href="dp.html" ><span>Dynamic Programming</span><small>Subproblems and recurrence</small></a><a class="nav-item" href="graph.html" ><span>Graph Algorithms</span><small>Traversal and graph structure</small></a><a class="nav-item" href="data-structures.html"><span>Data Structures</span><small>Foundational structures</small></a><a class="nav-item" href="hanoi.html" ><span>Tower of Hanoi</span><small>Recursion and puzzles</small></a><a class="nav-item" href="string-matching.html" ><span>String Matching</span><small>Text and pattern algorithms</small></a><a class="nav-item" href="backtracking.html" ><span>Backtracking Algorithms</span><small>Search and constraints</small></a><a class="nav-item" href="branch-bound.html" ><span>Branch and Bound</span><small>Exact optimization</small></a><a class="nav-item" href="advanced-data-structures.html" ><span>Advanced Data Structures</span><small>Trees, queries and sets</small></a><a class="nav-item active" href="cryptography-math.html" aria-current="page"><span>Cryptography & Mathematical Algorithms</span><small>Number theory and security</small></a><a class="nav-item" href="advanced-network-flows.html" ><span>Advanced Network Flows & Approximation</span><small>Flows and approximation</small></a></nav>
+<button type="button" class="shared-theme" id="themeToggle" aria-label="Switch theme">☾ Dark theme</button>
+<div class="shared-note"><b>Learning mode</b><p>Explore the visualizer, follow the steps, review the theory, and study the implementation examples.</p></div>
+</aside>
+<div class="shared-main" id="sharedMainContent">
+<div class="bg"><div class="orb"></div><div class="orb"></div><div class="orb"></div></div>
+<div class="header"><div class="logo">Cryptography &amp; Math</div><button class="back-btn" id="backBtn">← Home</button><a class="main-home-link" href="index.html">AlgoLab Catalog ↗</a><div class="sub">Interactive Visualizer</div></div>
+
+<div class="home" id="homeScreen">
+<h1>Cryptography &amp; Mathematical Algorithms</h1>
+<p class="tag">Core computational mathematics, hashing, and security-centric primitives</p>
+<div class="cards">
+<div class="card" data-a="0"><div class="ico"> ️</div><h3>Euclidean Algorithm</h3><p>Greatest common divisor by repeated division: watch the pair (a, b) shrink through quotients and remainders until the remainder hits zero.</p><div class="tags"><span class="tag">GCD</span><span class="tag p">Division chain</span><span class="tag g">O(log n)</span></div></div>
+<div class="card" data-a="1"><div class="ico"> </div><h3>Sieve of Eratosthenes</h3><p>Prime generation: mark 1 as non-prime, then strike out multiples of each prime starting from its square — survivors light up green.</p><div class="tags"><span class="tag">Primes</span><span class="tag p">Cross-out sweep</span><span class="tag g">~O(n log log n)</span></div></div>
+<div class="card" data-a="2"><div class="ico"> </div><h3>Modular Exponentiation</h3><p>Square-and-multiply on the binary digits of the exponent: compute 7²²⁰ mod 323 without ever building a huge number.</p><div class="tags"><span class="tag">a^b mod m</span><span class="tag p">Binary method</span><span class="tag g">O(log b)</span></div></div>
+<div class="card" data-a="3"><div class="ico"> </div><h3>RSA Algorithm</h3><p>Asymmetric key math: primes → n, φ(n) → public exponent e and private d; encrypt a message, decrypt it back, then sign and verify.</p><div class="tags"><span class="tag">Public/private keys</span><span class="tag p">Encrypt + sign</span><span class="tag r">Number theory</span></div></div>
+<div class="card" data-a="4"><div class="ico"> </div><h3>AES Block Cipher</h3><p>Real AES-128 round transforms on a 4×4 state: AddRoundKey, SubBytes, ShiftRows, MixColumns — checked against the official NIST vector.</p><div class="tags"><span class="tag">SP 800-38A</span><span class="tag p">4×4 state</span><span class="tag g">10 rounds</span></div></div>
+<div class="card" data-a="5"><div class="ico"> ️</div><h3>SHA-256 / MD5 Hashing</h3><p>Full compression functions: watch registers A–D (MD5) and H0–H7 (SHA-256) evolve through all 64 rounds, verified against official test vectors.</p><div class="tags"><span class="tag">Message digest</span><span class="tag p">64 rounds</span><span class="tag r">Avalanche demo</span></div></div>
+</div>
+</div>
+
+<div class="algo" id="algoScreen" style="display:none">
+
+<!-- 0: EUCLIDEAN GCD -->
+<div class="panel on" id="p0">
+<div class="algo-head"><h2>Euclidean Algorithm — GCD</h2><p>GCD(462, 108) by repeated modulo division</p></div>
+<div class="viz">
+<div class="legend"><span class="lg"><i style="background:linear-gradient(90deg,#f1c40f,#e67e22)"></i>a (dividend)</span><span class="lg"><i style="background:linear-gradient(90deg,#00d4ff,#6c5ce7)"></i>b (divisor)</span><span class="lg"><i style="background:rgba(72,208,168,.5)"></i>remainder becomes next b</span></div>
+<div class="sqwrap" id="seq0"></div>
+<div class="gbarwrap">
+<div class="grow"><span class="glab">a =</span><div class="gtrack"><div class="gbar ba" id="barA" style="width:100%"></div></div></div>
+<div class="grow"><span class="glab">b =</span><div class="gtrack"><div class="gbar bb" id="barB" style="width:23%"></div></div></div>
+</div>
+<div class="eqbig" id="eq0">462 = 4 × 108 + 30</div>
+<div class="stats" id="stats0"></div>
+<div class="log" id="log0"></div>
+<div class="result" id="res0"></div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="prog0"></div></div>
+<div class="status" id="s0">Press Play or Step to begin</div>
+<div class="controls"><button class="btn b-play" id="play0">▶ Play</button><button class="btn b-step" id="step0">Next Step</button><button class="btn b-reset" id="reset0">Reset</button><div class="speed"><label>Speed</label><input type="range" min="150" max="1500" value="550" id="spd0"><span class="val" id="spdv0">0.55s</span></div></div>
+<div class="desc"><b>How:</b> replace (a, b) with (b, a mod b) until b = 0 — the last non-zero remainder is gcd. Each step shrinks the numbers at least as fast as halving → O(log min(a,b)). Works for any size integers, the backbone of RSA key math. <span class="cx">Time: O(log n) | Space: O(1)</span></div>
+<div class="learning-lab" id="cryptoLearning0"></div>
+</div>
+
+<!-- 1: SIEVE -->
+<div class="panel" id="p1">
+<div class="algo-head"><h2>Sieve of Eratosthenes</h2><p>All primes up to 100 — crossing out multiples starting at p²</p></div>
+<div class="viz">
+<div class="legend"><span class="lg"><i style="background:#1a1d3e;border-color:#34495e"></i>candidate</span><span class="lg"><i style="background:rgba(241,196,15,.3);border-color:#f1c40f"></i>current prime p</span><span class="lg"><i style="background:rgba(255,107,107,.4)"></i>multiple being crossed</span><span class="lg"><i style="background:rgba(255,107,107,.14)"></i>composite (crossed)</span><span class="lg"><i style="background:rgba(72,208,168,.3);border-color:#48d0b0"></i>prime (final)</span></div>
+<div class="sqwrap" id="ops1"></div>
+<div class="sgrid" id="grid1"></div>
+<div class="stats" id="stats1"></div>
+<div class="log" id="log1"></div>
+<div class="result" id="res1"></div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="prog1"></div></div>
+<div class="status" id="s1">Press Play or Step to begin</div>
+<div class="controls"><button class="btn b-play" id="play1">▶ Play</button><button class="btn b-step" id="step1">Next Step</button><button class="btn b-reset" id="reset1">Reset</button><div class="speed"><label>Speed</label><input type="range" min="150" max="1500" value="550" id="spd1"><span class="val" id="spdv1">0.55s</span></div></div>
+<div class="desc"><b>How:</b> 1 is not prime. For every uncrossed p, all multiples p·p, p·(p+1), … are composite — smaller multiples already died under earlier primes, so we start at p². Whatever survives to √n is prime. <span class="cx">Time: O(n log log n) | Space: O(n)</span></div>
+<div class="learning-lab" id="cryptoLearning1"></div>
+</div>
+
+<!-- 2: MODULAR EXPONENTIATION -->
+<div class="panel" id="p2">
+<div class="algo-head"><h2>Modular Exponentiation</h2><p>Compute 7²²⁰ mod 323 by square-and-multiply</p></div>
+<div class="viz">
+<div class="legend"><span class="lg"><i style="background:rgba(0,212,255,.25)"></i>current exponent bit</span><span class="lg"><i style="background:rgba(72,208,168,.3)"></i>bit processed</span><span class="lg"><i style="background:rgba(155,89,182,.3)"></i>modulo reduction</span></div>
+<div class="bits" id="bits2"></div>
+<div class="lane">
+<div class="lbox" id="boxR"><div class="ll">result R</div><div class="lv" id="valR">1</div></div>
+<div class="lbox mid" id="boxA"><div class="ll">base a</div><div class="lv">7</div></div>
+<div class="lbox" id="boxM"><div class="ll">modulus m</div><div class="lv">323</div></div>
+</div>
+<div class="formula" id="eq2">exponent 220 = 11011100₂ — scan bits left → right</div>
+<div class="stats" id="stats2"></div>
+<div class="log" id="log2"></div>
+<div class="result" id="res2"></div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="prog2"></div></div>
+<div class="status" id="s2">Press Play or Step to begin</div>
+<div class="controls"><button class="btn b-play" id="play2">▶ Play</button><button class="btn b-step" id="step2">Next Step</button><button class="btn b-reset" id="reset2">Reset</button><div class="speed"><label>Speed</label><input type="range" min="150" max="1500" value="550" id="spd2"><span class="val" id="spdv2">0.55s</span></div></div>
+<div class="desc"><b>How:</b> read the exponent's bits MSB→LSB: always <b>square</b> the result mod m; whenever the bit is 1, also <b>multiply by a</b> mod m. Products stay under m² — never overflow, never store 7²²⁰. <span class="cx">Time: O(log b) multiplications | used in RSA/Diffie-Hellman</span></div>
+<div class="learning-lab" id="cryptoLearning2"></div>
+</div>
+
+<!-- 3: RSA -->
+<div class="panel" id="p3">
+<div class="algo-head"><h2>RSA Algorithm</h2><p>Key generation · encryption · decryption · digital signature</p></div>
+<div class="viz">
+<div class="sqwrap" id="ops3"></div>
+<div class="klines" id="keys3"></div>
+<div class="keyrow" id="keys3b"></div>
+<div class="flow" id="flow3"></div>
+<div class="stats" id="stats3"></div>
+<div class="log" id="log3"></div>
+<div class="result" id="res3"></div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="prog3"></div></div>
+<div class="status" id="s3">Press Play or Step to begin</div>
+<div class="controls"><button class="btn b-play" id="play3">▶ Play</button><button class="btn b-step" id="step3">Next Step</button><button class="btn b-reset" id="reset3">Reset</button><div class="speed"><label>Speed</label><input type="range" min="150" max="1500" value="550" id="spd3"><span class="val" id="spdv3">0.55s</span></div></div>
+<div class="desc"><b>How:</b> n = p·q, φ = (p−1)(q−1); pick e coprime to φ, then d = e⁻¹ mod φ so that m^(e·d) ≡ m (mod n). Anyone can encrypt with (e, n) — only d decrypts. Signing flips it: s = m^d, verify with e. Security rests on factoring n being hard. <span class="cx">Keygen O(log²n) | encrypt/decrypt = modular exponentiation</span></div>
+<div class="learning-lab" id="cryptoLearning3"></div>
+</div>
+
+<!-- 4: AES -->
+<div class="panel" id="p4">
+<div class="algo-head"><h2>AES Block Cipher (AES-128)</h2><p>Real round transforms on a 4×4 state — NIST SP 800-38A test vector</p></div>
+<div class="viz">
+<div class="legend"><span class="lg"><i style="background:#1a1d3e"></i>state byte (hue = value)</span><span class="lg"><i style="background:rgba(72,208,168,.5)"></i>changed this step</span><span class="lg"><i style="background:rgba(241,196,15,.5)"></i>round key</span></div>
+<div class="sqwrap" id="ops4"></div>
+<div class="aeswrap">
+<div>
+<div class="aesgrid" id="aesState"></div>
+<div style="font-size:.6rem;color:var(--dim);text-transform:uppercase;letter-spacing:1.5px;text-align:center;margin-top:8px">4×4 state (column-major, hex)</div>
+</div>
+<div class="aesmeta">
+<div class="aesphase" id="aesPhase">AES-128 ready</div>
+<div style="font-size:.6rem;color:var(--dim);text-transform:uppercase;letter-spacing:1.5px;text-align:center">round key (16 bytes)</div>
+<div class="rkrow" id="aesKey"></div>
+<div class="aesct" id="aesCt"><span class="lbl">ciphertext</span><span class="h" id="aesCtV">—</span></div>
+</div>
+</div>
+<div class="stats" id="stats4"></div>
+<div class="log" id="log4"></div>
+<div class="result" id="res4"></div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="prog4"></div></div>
+<div class="status" id="s4">Press Play or Step to begin</div>
+<div class="controls"><button class="btn b-play" id="play4">▶ Play</button><button class="btn b-step" id="step4">Next Step</button><button class="btn b-reset" id="reset4">Reset</button><div class="speed"><label>Speed</label><input type="range" min="150" max="1500" value="550" id="spd4"><span class="val" id="spdv4">0.55s</span></div></div>
+<div class="desc"><b>How:</b> each round mixes the 16-byte state: <b>AddRoundKey</b> XORs the round key, <b>SubBytes</b> substitutes every byte through the AES S-box (GF(2⁸) inversion + affine map), <b>ShiftRows</b> rotates row r by r, <b>MixColumns</b> does a Galois-field matrix multiply. 10 rounds for AES-128. <span class="cx">Block 128-bit | Key 128-bit | 10 rounds</span></div>
+<div class="learning-lab" id="cryptoLearning4"></div>
+</div>
+
+<!-- 5: SHA-256 / MD5 -->
+<div class="panel" id="p5">
+<div class="algo-head"><h2>SHA-256 / MD5 Hashing</h2><p>Full 64-round compression of input "abc" — verified against official vectors</p></div>
+<div class="viz">
+<div class="legend"><span class="lg"><i style="background:rgba(0,212,255,.4)"></i>active algorithm</span><span class="lg"><i style="background:rgba(72,208,168,.5)"></i>register updated this round</span><span class="lg"><i style="background:#1a1d3e"></i>idle register</span></div>
+<div class="sqwrap" id="ops5"></div>
+<div class="inpbar" id="inp5"></div>
+<div class="hashcols">
+<div class="hcol" id="colMd5"><h4>MD5 — 4 × 32-bit registers</h4><div class="regs" id="md5regs"></div></div>
+<div class="hcol" id="colSha"><h4>SHA-256 — 8 × 32-bit registers</h4><div class="regs" id="shaRegs"></div></div>
+</div>
+<div class="cur5" id="cur5">—</div>
+<div class="outs5" id="out5"></div>
+<div class="stats" id="stats5"></div>
+<div class="log" id="log5"></div>
+<div class="result" id="res5"></div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="prog5"></div></div>
+<div class="status" id="s5">Press Play or Step to begin</div>
+<div class="controls"><button class="btn b-play" id="play5">▶ Play</button><button class="btn b-step" id="step5">Next Step</button><button class="btn b-reset" id="reset5">Reset</button><div class="speed"><label>Speed</label><input type="range" min="150" max="1500" value="550" id="spd5"><span class="val" id="spdv5">0.55s</span></div></div>
+<div class="desc"><b>How:</b> both hashes pad the message to 512-bit blocks, load initial registers, then run 64 rounds of mixing (add constant K[t], message word W[t], rotate/shift) — tiny input changes cascade to completely different output bits. MD5 is broken for signatures; SHA-256 remains secure. <span class="cx">MD5: 128-bit, broken | SHA-256: 256-bit, FIPS 180-4</span></div>
+<div class="learning-lab" id="cryptoLearning5"></div>
+</div>
+
+</div>
+<div class="confetti" id="confetti"></div>
+<script src="cryptography-algorithms.js"></script>
+<script src="cryptography-learning.js"></script>
+</div></div>
+<script src="theme.js"></script>
+<script src="enhance.js" defer></script></body>
+</html>

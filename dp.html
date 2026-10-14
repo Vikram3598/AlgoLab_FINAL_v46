@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dynamic Programming | AlgoLab</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#060912;--card:#0a0a2e;--border:#1f2833;--accent:#00d4ff;--green:#48d0b0;--red:#ff6b6b;--gold:#f1c40f;--purple:#9b59b6;--pink:#e84393;--text:#e0e0e0;--dim:#667080}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;overflow-x:hidden}
+.bg-anim{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;overflow:hidden}
+.bg-anim .orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.12;animation:orbF 22s ease-in-out infinite}
+.bg-anim .orb:nth-child(1){width:400px;height:400px;background:var(--accent);top:-100px;left:-100px}
+.bg-anim .orb:nth-child(2){width:350px;height:350px;background:var(--purple);bottom:-100px;right:-100px;animation-delay:-8s}
+.bg-anim .orb:nth-child(3){width:300px;height:300px;background:var(--pink);top:40%;left:55%;animation-delay:-15s}
+@keyframes orbF{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(70px,-50px) scale(1.15)}66%{transform:translate(-50px,70px) scale(.85)}}
+.header{position:relative;z-index:10;background:rgba(10,10,46,.92);backdrop-filter:blur(10px);padding:14px 25px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.logo{font-size:1.3rem;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sub{color:var(--dim);font-size:.75rem}
+.back-btn{padding:7px 16px;background:rgba(0,212,255,.1);border:1px solid var(--accent);border-radius:6px;color:var(--accent);font-size:.8rem;cursor:pointer;transition:all .2s;display:none}
+.back-btn:hover{background:rgba(0,212,255,.2);transform:translateX(-3px)}
+.back-btn.show{display:block}
+.home{position:relative;z-index:1;max-width:1050px;margin:0 auto;padding:40px 20px;text-align:center}
+.home h1{font-size:2.2rem;margin-bottom:8px;background:linear-gradient(135deg,var(--accent),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.home .tagline{color:var(--dim);font-size:.95rem;margin-bottom:35px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px;cursor:pointer;transition:all .3s;position:relative;overflow:hidden;text-align:left}
+.card::before{content:'';position:absolute;top:0;left:0;width:100%;height:3px;background:linear-gradient(90deg,var(--accent),var(--pink));transform:scaleX(0);transition:transform .3s;transform-origin:left}
+.card:hover{transform:translateY(-6px);border-color:var(--accent);box-shadow:0 12px 40px rgba(0,212,255,.15)}
+.card:hover::before{transform:scaleX(1)}
+.card .icon{font-size:2rem;margin-bottom:10px}
+.card h3{color:var(--accent);font-size:1rem;margin-bottom:6px}
+.card p{color:var(--dim);font-size:.78rem;line-height:1.5;margin-bottom:10px}
+.tags{display:flex;gap:8px;flex-wrap:wrap}
+.tag{font-size:.63rem;padding:3px 8px;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.2);border-radius:12px;color:var(--accent)}
+.tag.g{background:rgba(72,208,176,.1);border-color:rgba(72,208,176,.2);color:var(--green)}
+.tag.o{background:rgba(241,196,15,.1);border-color:rgba(241,196,15,.2);color:var(--gold)}
+.algo{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:20px}
+.algo-head{text-align:center;margin-bottom:18px}
+.algo-head h2{color:var(--accent);font-size:1.4rem;margin-bottom:4px}
+.algo-head p{color:var(--dim);font-size:.85rem}
+.viz{background:rgba(10,10,46,.7);border:1px solid var(--border);border-radius:16px;padding:22px;min-height:340px;margin-bottom:14px;position:relative;overflow:hidden;backdrop-filter:blur(5px)}
+.viz::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--accent),transparent);opacity:.5}
+.controls{display:flex;gap:10px;justify-content:center;margin-bottom:12px;flex-wrap:wrap;align-items:center}
+.btn{padding:10px 24px;border:none;border-radius:8px;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .2s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 4px 15px rgba(0,0,0,.3)}
+.btn:active{transform:translateY(0)}.btn:disabled{opacity:.3;cursor:not-allowed;transform:none!important}
+.b-play{background:linear-gradient(135deg,var(--accent),#0099cc);color:#060912}
+.b-step{background:rgba(0,212,255,.1);color:var(--accent);border:1px solid var(--accent)}
+.b-reset{background:rgba(255,107,107,.1);color:var(--red);border:1px solid var(--red)}
+.speed{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:6px 14px}
+.speed label{font-size:.7rem;color:var(--dim);text-transform:uppercase;letter-spacing:1px}
+.speed input[type=range]{width:80px;accent-color:var(--accent)}
+.speed .val{font-size:.75rem;color:var(--accent);font-weight:600;min-width:35px}
+.progress-bar{height:4px;background:var(--border);border-radius:2px;margin-bottom:12px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--green));border-radius:2px;transition:width .3s;width:0%}
+.status{text-align:center;color:var(--dim);font-size:.88rem;min-height:24px;margin-bottom:12px;font-weight:500}
+.status.ok{color:var(--green)}.status.hl{color:var(--gold)}.status.err{color:var(--red)}
+.desc{background:rgba(15,15,39,.8);border:1px solid var(--border);border-radius:10px;padding:14px 18px;font-size:.78rem;color:var(--dim);line-height:1.7}
+.desc b{color:var(--accent)}
+.desc .cx{display:inline-block;margin-top:6px;padding:3px 10px;background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.15);border-radius:12px;color:var(--accent);font-size:.72rem;font-family:monospace}
+svg{display:block;margin:0 auto;max-width:100%}
+.result{background:rgba(72,208,176,.06);border:1px solid var(--green);border-radius:10px;padding:14px;text-align:center;margin-top:12px;font-size:1rem;color:var(--green);font-weight:700;display:none;animation:slideUp .4s ease}
+.result.show{display:block}
+@keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+/* DP Table */
+.dp-table{border-collapse:separate;border-spacing:2px;margin:0 auto;font-size:.78rem}
+.dp-table td{width:42px;height:34px;text-align:center;border:1px solid var(--border);border-radius:4px;background:rgba(15,15,39,.6);color:var(--dim);transition:all .3s;font-weight:600}
+.dp-table td.hdr{background:rgba(0,212,255,.08);color:var(--accent);font-size:.7rem}
+.dp-table td.cur{background:rgba(241,196,15,.2);border-color:var(--gold);color:var(--gold);transform:scale(1.1);box-shadow:0 0 10px rgba(241,196,15,.3)}
+.dp-table td.done{background:rgba(72,208,176,.08);border-color:rgba(72,208,176,.3);color:var(--green)}
+.dp-table td.path{background:rgba(0,212,255,.15);border-color:var(--accent);color:var(--accent)}
+.dp-table td.dim{opacity:.3}
+/* Matrix */
+.mx{display:grid;gap:3px;margin:8px auto;justify-content:center}
+.mx-cell{width:46px;height:34px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);border-radius:4px;font-size:.78rem;font-weight:600;background:rgba(15,15,39,.6);color:var(--dim);transition:all .3s}
+.mx-cell.hdr{background:rgba(0,212,255,.08);color:var(--accent);font-size:.7rem}
+.mx-cell.cur{background:rgba(241,196,15,.2);border-color:var(--gold);color:var(--gold);transform:scale(1.08);box-shadow:0 0 8px rgba(241,196,15,.3)}
+.mx-cell.upd{background:rgba(255,107,107,.15);border-color:var(--red);color:var(--red)}
+.mx-cell.done{background:rgba(72,208,176,.08);border-color:rgba(72,208,176,.25);color:var(--green)}
+/* String display */
+.strings{display:flex;gap:30px;justify-content:center;margin-bottom:14px;flex-wrap:wrap}
+.str-box{text-align:center}
+.str-label{font-size:.7rem;color:var(--dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.str-chars{display:flex;gap:3px;justify-content:center}
+.ch{width:34px;height:34px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);border-radius:5px;font-weight:700;font-size:.85rem;background:rgba(15,15,39,.6);color:var(--text);transition:all .3s}
+.ch.hl{background:rgba(241,196,15,.2);border-color:var(--gold);color:var(--gold);transform:scale(1.1)}
+.ch.match{background:rgba(72,208,176,.15);border-color:var(--green);color:var(--green)}
+/* Array bars */
+.bars{display:flex;gap:6px;align-items:flex-end;justify-content:center;height:180px;margin-top:10px}
+.bar{width:48px;border-radius:6px 6px 0 0;position:relative;transition:all .4s;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:4px;font-size:.7rem;font-weight:700;min-height:30px}
+.bar .lbl{position:absolute;top:-22px;font-size:.75rem;color:var(--dim);font-weight:600}
+.bar.neg{background:linear-gradient(to top,var(--red),#cc5555);color:#fff}
+.bar.pos{background:linear-gradient(to top,var(--green),#33b89a);color:#060912}
+.bar.max{background:linear-gradient(to top,var(--gold),#ddaa22);color:#060912;box-shadow:0 0 15px rgba(241,196,15,.4)}
+.bar.cur{outline:2px solid var(--accent);outline-offset:2px}
+/* Item cards */
+.item{display:flex;justify-content:space-between;align-items:center;padding:7px 12px;background:rgba(10,10,46,.6);border-radius:7px;margin-bottom:5px;font-size:.82rem;border:1px solid transparent;transition:all .35s}
+.item.taken{border-color:var(--green);background:rgba(72,208,176,.08)}
+.item.skip{opacity:.35}
+.item.hl{border-color:var(--gold);background:rgba(241,196,15,.08)}
+/* Steps list */
+.steps-log{max-height:150px;overflow-y:auto;padding:8px;background:rgba(15,15,39,.6);border-radius:8px;margin-top:10px}
+.step-line{font-size:.75rem;color:var(--dim);padding:3px 0;border-bottom:1px solid rgba(31,40,51,.5)}
+.step-line:last-child{border:none}
+.step-line.hl{color:var(--gold)}
+.step-line.ok{color:var(--green)}
+.err-msg{color:var(--red);text-align:center;padding:30px;font-size:.9rem}
+.confetti{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1000;overflow:hidden}
+.confetti .pc{position:absolute;top:-10px;animation:cf linear forwards}
+@keyframes cf{0%{top:-10px;opacity:1;transform:rotate(0)}100%{top:110%;opacity:0;transform:rotate(720deg)}}
+@media(max-width:600px){.home h1{font-size:1.5rem}.cards{grid-template-columns:1fr}.viz{padding:14px}.btn{padding:8px 16px;font-size:.78rem}.dp-table td{width:32px;height:28px;font-size:.7rem}}
+
+/* AlgoLab DP learning panels and persistent left navigation */
+.panel{display:none}.panel.on{display:block}
+.dp-app{position:relative;z-index:1;display:flex;min-height:calc(100vh - 58px);align-items:stretch}
+.dp-sidebar{width:265px;flex:0 0 265px;background:rgba(8,18,32,.94);border-right:1px solid var(--border);padding:22px 15px;display:flex;flex-direction:column;gap:7px;backdrop-filter:blur(10px)}
+.dp-brand{display:flex;align-items:center;gap:11px;padding:2px 7px 22px}.dp-brand-mark{width:39px;height:39px;display:grid;place-items:center;border-radius:11px;background:linear-gradient(135deg,var(--accent),var(--purple));color:#06101a;font-weight:900;font-size:21px}.dp-brand b{display:block;font-size:1.05rem;color:var(--text)}.dp-brand small{display:block;color:var(--dim);font-size:.72rem;margin-top:2px}
+.dp-home-link{display:block;text-decoration:none;color:var(--accent);font-size:.82rem;padding:9px 10px;border:1px solid transparent;border-radius:8px;margin-bottom:12px}.dp-home-link:hover{background:rgba(0,212,255,.08);border-color:var(--border)}
+.dp-side-title{padding:0 10px 7px;color:var(--dim);font-size:.68rem;font-weight:800;letter-spacing:1.2px}.dp-nav{display:flex;flex-direction:column;gap:3px}.dp-nav-btn{display:flex;align-items:center;gap:9px;width:100%;text-align:left;padding:9px 10px;border:1px solid transparent;border-radius:9px;background:transparent;color:var(--dim);font:inherit;font-size:.79rem;cursor:pointer;transition:all .18s}.dp-nav-btn .nav-icon{width:23px;text-align:center;font-size:1rem;flex-shrink:0}.dp-nav-btn:hover{background:rgba(0,212,255,.07);color:var(--text)}.dp-nav-btn.active{background:rgba(0,212,255,.12);border-color:rgba(0,212,255,.28);color:var(--text)}
+.dp-side-note{margin-top:auto;padding:12px;border:1px solid var(--border);border-radius:10px;background:rgba(10,10,46,.65);color:var(--dim);font-size:.75rem;line-height:1.55}.dp-side-note b{color:var(--green);display:block;margin-bottom:4px}.dp-main{min-width:0;flex:1;padding:0 22px 25px}.dp-main .home,.dp-main .algo{max-width:1120px}.dp-main .home{padding-top:32px}.dp-main .algo{padding:20px 0}.dp-main .home .cards{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+.dp-learning{margin:18px 0 30px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px;color:var(--text)}.gl-head{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:16px}.gl-head h3{font-size:1.2rem;color:var(--accent)}.gl-head label{font-size:.8rem;color:var(--text)}.gl-head select{margin-left:8px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:7px;padding:8px;font:inherit}.gl-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.gl-card{min-width:0;background:rgba(15,15,39,.8);border:1px solid var(--border);border-radius:10px;padding:16px;color:var(--text)}.gl-card h4{color:var(--accent);margin:0 0 8px;font-size:.95rem}.gl-card p,.gl-card li{color:var(--text);font-size:.86rem;line-height:1.65}.gl-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px}.gl-metric{padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px}.gl-metric b{display:block;color:var(--dim);font-size:.7rem;text-transform:uppercase;margin-bottom:4px}.gl-metric span{color:var(--green);font:600 .85rem ui-monospace,monospace}.gl-code{background:#101827;border:1px solid #344256;border-radius:9px;overflow:auto;max-height:460px;margin-top:10px}.gl-code pre{margin:0;padding:16px;min-width:max-content;color:#e5edf7;font:13px/1.65 Consolas,Monaco,monospace;tab-size:4;white-space:pre}.gl-note{font-size:.78rem;color:var(--dim)!important;margin-top:8px}.gl-special{margin-top:10px;padding:10px;border-left:3px solid var(--gold);background:rgba(241,196,15,.08);border-radius:5px}.gl-lang{font-size:.8rem}.dp-learning code .kw{color:#c792ea}.dp-learning code .str{color:#c3e88d}.dp-learning code .num{color:#f78c6c}.dp-learning code .com{color:#8292a8}
+@media(max-width:850px){.dp-sidebar{width:230px;flex-basis:230px;padding:18px 10px}.dp-main{padding:0 12px 20px}}
+@media(max-width:650px){.dp-app{display:block}.dp-sidebar{width:100%;padding:12px;display:block;border-right:0;border-bottom:1px solid var(--border)}.dp-brand{padding-bottom:10px}.dp-home-link{display:inline-block;margin:0 0 7px}.dp-side-title{padding-top:4px}.dp-nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px}.dp-nav-btn{padding:8px;font-size:.72rem}.dp-side-note{display:none}.dp-main{padding:0 10px 18px}.dp-main .home{padding:25px 8px}.dp-main .algo{padding:16px 4px}.gl-grid{grid-template-columns:1fr}.dp-learning{padding:14px}.gl-metrics{grid-template-columns:1fr 1fr}.dp-main .home .cards{grid-template-columns:1fr}}
+
+</style>
+<link rel="stylesheet" href="design-system.css">
+<style id="algolab-shared-typography">html,body,button,input,select,textarea{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif!important}body{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}</style>
+<link rel="stylesheet" href="enhance.css"></head>
+<body data-theme="dark">
+<div class="shared-shell" id="sharedAlgoLabShell">
+<aside class="shared-sidebar" aria-label="AlgoLab navigation">
+<a class="shared-brand" href="index.html"><span class="shared-brand-mark">A</span><span><b>AlgoLab</b><small>INTERACTIVE LEARNING STUDIO</small></span></a>
+<a class="shared-home" href="index.html">← All learning labs</a>
+<div class="shared-side-title">LEARNING LABS</div>
+<nav class="shared-nav" id="sharedAlgoLabNav" aria-label="Learning labs"><a class="nav-item" href="sorting.html" ><span>Sorting Algorithms</span><small>Core algorithm lab</small></a><a class="nav-item" href="searching.html"><span>Searching Algorithms</span><small>Array, tree and graph search</small></a><a class="nav-item" href="greedy.html" ><span>Greedy Algorithms</span><small>Optimization strategies</small></a><a class="nav-item active" href="dp.html" aria-current="page"><span>Dynamic Programming</span><small>Subproblems and recurrence</small></a><a class="nav-item" href="graph.html" ><span>Graph Algorithms</span><small>Traversal and graph structure</small></a><a class="nav-item" href="data-structures.html"><span>Data Structures</span><small>Foundational structures</small></a><a class="nav-item" href="hanoi.html" ><span>Tower of Hanoi</span><small>Recursion and puzzles</small></a><a class="nav-item" href="string-matching.html" ><span>String Matching</span><small>Text and pattern algorithms</small></a><a class="nav-item" href="backtracking.html" ><span>Backtracking Algorithms</span><small>Search and constraints</small></a><a class="nav-item" href="branch-bound.html" ><span>Branch and Bound</span><small>Exact optimization</small></a><a class="nav-item" href="advanced-data-structures.html" ><span>Advanced Data Structures</span><small>Trees, queries and sets</small></a><a class="nav-item" href="cryptography-math.html" ><span>Cryptography & Mathematical Algorithms</span><small>Number theory and security</small></a><a class="nav-item" href="advanced-network-flows.html" ><span>Advanced Network Flows & Approximation</span><small>Flows and approximation</small></a></nav>
+<div class="shared-module-divider">DYNAMIC PROGRAMMING</div>
+<nav class="dp-nav" id="dpNav">
+    <button class="dp-nav-btn" data-a="0"><span class="nav-icon">🎒</span><span>0/1 Knapsack</span></button>
+    <button class="dp-nav-btn" data-a="1"><span class="nav-icon">🔤</span><span>Longest Common Subsequence</span></button>
+    <button class="dp-nav-btn" data-a="2"><span class="nav-icon">📈</span><span>Longest Increasing Subsequence</span></button>
+    <button class="dp-nav-btn" data-a="3"><span class="nav-icon">🧮</span><span>Matrix Chain Multiplication</span></button>
+    <button class="dp-nav-btn" data-a="4"><span class="nav-icon">🕸️</span><span>Bellman–Ford</span></button>
+    <button class="dp-nav-btn" data-a="5"><span class="nav-icon">🗺️</span><span>Floyd–Warshall</span></button>
+    <button class="dp-nav-btn" data-a="6"><span class="nav-icon">✏️</span><span>Edit Distance</span></button>
+    <button class="dp-nav-btn" data-a="7"><span class="nav-icon">📊</span><span>Kadane’s Algorithm</span></button>
+    <button class="dp-nav-btn" data-a="8"><span class="nav-icon">🥚</span><span>Egg Dropping Puzzle</span></button>
+  </nav>
+<div class="dp-side-note"><b>Learning mode</b>Choose an algorithm to open its visualizer. Use Play or Next Step to follow each decision, then review the theory, complexity and code below.</div>
+<button type="button" class="shared-theme" id="themeToggle" aria-label="Switch theme">☾ Dark theme</button>
+</aside>
+<div class="shared-main" id="sharedMainContent">
+<div class="bg-anim"><div class="orb"></div><div class="orb"></div><div class="orb"></div></div>
+<div class="header"><div class="logo"><a href="index.html" style="color:inherit;text-decoration:none">AlgoLab</a> / Dynamic Programming</div><button class="back-btn" id="backBtn">← Overview</button><div class="sub">Interactive Visualizer · <a href="index.html" style="color:var(--accent);text-decoration:none">All learning labs</a></div></div>
+
+
+<div class="dp-app">
+
+<main class="dp-main">
+<div class="home" id="homeScreen">
+<h1>Dynamic Programming Visualizer</h1>
+<p class="tagline">9 classic DP algorithms — watch memoization &amp; tabulation come to life step by step</p>
+<div class="cards">
+<div class="card" data-a="0"><div class="icon"> </div><h3>0/1 Knapsack</h3><p>Take or leave items to maximize value within capacity — rigid choice restrictions.</p><div class="tags"><span class="tag">2D DP</span><span class="tag g">O(nW)</span></div></div>
+<div class="card" data-a="1"><div class="icon"> </div><h3>Longest Common Subsequence</h3><p>Find the longest subsequence common to two sequences — used in version control &amp; DNA alignment.</p><div class="tags"><span class="tag">2D DP</span><span class="tag g">O(nm)</span></div></div>
+<div class="card" data-a="2"><div class="icon"> </div><h3>Longest Increasing Subsequence</h3><p>Find the longest strictly increasing subsequence in an array.</p><div class="tags"><span class="tag">1D DP</span><span class="tag g">O(n²)</span></div></div>
+<div class="card" data-a="3"><div class="icon"> </div><h3>Matrix Chain Multiplication</h3><p>Find the optimal parenthesization to minimize scalar multiplications.</p><div class="tags"><span class="tag">2D DP</span><span class="tag g">O(n³)</span></div></div>
+<div class="card" data-a="4"><div class="icon"> </div><h3>Bellman-Ford</h3><p>Single-source shortest path with negative edge weights and negative cycle detection.</p><div class="tags"><span class="tag">Graph</span><span class="tag g">O(VE)</span></div></div>
+<div class="card" data-a="5"><div class="icon"> </div><h3>Floyd-Warshall</h3><p>All-pairs shortest paths via intermediate vertex iteration on a distance matrix.</p><div class="tags"><span class="tag">Matrix</span><span class="tag g">O(V³)</span></div></div>
+<div class="card" data-a="6"><div class="icon"> ✏️</div><h3>Edit Distance</h3><p>Minimum operations to transform one word into another (insert, delete, substitute).</p><div class="tags"><span class="tag">2D DP</span><span class="tag g">O(nm)</span></div></div>
+<div class="card" data-a="7"><div class="icon"> </div><h3>Kadane's Algorithm</h3><p>Maximum subarray sum in linear time — find the contiguous subarray with largest sum.</p><div class="tags"><span class="tag">1D DP</span><span class="tag g">O(n)</span></div></div>
+<div class="card" data-a="8"><div class="icon"> </div><h3>Egg Dropping Puzzle</h3><p>Find minimum trials to determine the critical floor — classic optimization puzzle.</p><div class="tags"><span class="tag">2D DP</span><span class="tag g">O(ef²)</span></div></div>
+</div>
+</div>
+
+<div class="algo" id="algoScreen" style="display:none">
+
+<!-- 0: 0/1 KNAPSACK -->
+<div class="panel on" id="p0">
+<div class="algo-head"><h2>0/1 Knapsack Problem</h2><p>Maximize value — each item taken entirely or not at all</p></div>
+<div class="viz">
+<div style="display:flex;gap:20px;flex-wrap:wrap;justify-content:center">
+<div style="flex:1;min-width:220px"><div style="font-size:.65rem;color:var(--dim);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px">Items (w, v)</div><div id="kItems"></div></div>
+<div style="flex:1.2;min-width:280px"><div style="font-size:.65rem;color:var(--dim);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px">DP Table</div><div id="kTable" style="overflow-x:auto"></div></div>
+</div>
+<div class="result" id="kResult"></div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="prog0"></div></div>
+<div class="status" id="s0">Press Play or Step to begin</div>
+<div class="controls"><button class="btn b-play" id="play0">▶ Play</button><button class="btn b-step" id="step0">Next Step</button><button class="btn b-reset" id="reset0">Reset</button><div class="speed"><label>Speed</label><input type="range" min="150" max="1200" value="600" id="spd0"><span class="val" id="spdv0">0.6s</span></div></div>
+<div class="desc"><b>How:</b> For each item and each capacity, choose max(skip item, take item). Build table bottom-up. Backtrack to find which items were taken. <span class="cx">Time: O(nW) | Space: O(nW)</span></div>
+<section class="dp-learning" id="dpLearn0"></section>
+</div>
+
+<!-- 1: LCS -->
+<div class="panel" id="p1">
+<div class="algo-head"><h2>Longest Common Subsequence</h2><p>Find the longest subsequence common to two strings</p></div>
+<div class="viz">
+<div class="strings" id="lcsStrs"></div>
+<div id="lcsTable" style="overflow-x:auto"></div>
+<div class="result" id="lcsResult"></div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="prog1"></div></div>
+<div class="status" id="s1">Press Play or Step to begin</div>
+<div class="controls"><button class="btn b-play" id="play1">▶ Play</button><button class="btn b-step" id="step1">Next Step</button><button class="btn b-reset" id="reset1">Reset</button><div class="speed"><label>Speed</label><input type="range" min="150" max="1200" value="500" id="spd1"><span class="val" id="spdv1">0.5s</span></div></div>
+<div class="desc"><b>How:</b> If characters match, extend diagonal. Otherwise take max of left/top. Build DP table, then backtrack to recover the actual subsequence. <span class="cx">Time: O(nm) | Space: O(nm)</span></div>
+<section class="dp-learning" id="dpLearn1"></section>
+</div>
+
+<!-- 2: LIS -->
+<div class="panel" id="p2">
+<div class="algo-head"><h2>Longest Increasing Subsequence</h2><p>Find the longest strictly increasing subsequence</p></div>
+<div class="viz">
+<div id="lisBars" style="text-align:center"></div>
+<div id="lisTable" style="overflow-x:auto;margin-top:14px"></div>
+<div class="result" id="lisResult"></div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="prog2"></div></div>
+<div class="status" id="s2">Press Play or Step to begin</div>
+<div class="controls"><button class="btn b-play" id="play2">▶ Play</button><button class="btn b-step" id="step2">Next Step</button><button class="btn b-reset" id="reset2">Reset</button><div class="speed"><label>Speed</label><input type="range" min="150" max="1200" value="500" id="spd2"><span class="val" id="spdv2">0.5s</span></div></div>
+<div class="desc"><b>How:</b> For each element, check all previous elements. If arr[j] &lt; arr[i], update dp[i] = max(dp[i], dp[j]+1). The answer is max of all dp[i]. <span class="cx">Time: O(n²) | Space: O(n)</span></div>
+<section class="dp-learning" id="dpLearn2"></section>
+</div>
+
+<!-- 3: MCM -->
+<div class="panel" id="p3">
+<div class="algo-head"><h2>Matrix Chain Multiplication</h2><p>Find optimal parenthesization to minimize multiplications</p></div>
+<div class="viz">
+<div style="text-align:center;margin-bottom:10px" id="mcmDims"></div>
+<div id="mcmTable" style="overflow-x:auto"></div>
+<div class="result" id="mcmResult"></div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="prog3"></div></div>
+<div class="status" id="s3">Press Play or Step to begin</div>
+<div class="controls"><button class="btn b-play" id="play3">▶ Play</button><button class="btn b-step" id="step3">Next Step</button><button class="btn b-reset" id="reset3">Reset</button><div class="speed"><label>Speed</label><input type="range" min="150" max="1200" value="400" id="spd3"><span class="val" id="spdv3">0.4s</span></div></div>
+<div class="desc"><b>How:</b> For each chain length, try all split points. dp[i][j] = min over k of (dp[i][k]+dp[k+1][j]+p[i-1]*p[k]*p[j]). <span class="cx">Time: O(n³) | Space: O(n²)</span></div>
+<section class="dp-learning" id="dpLearn3"></section>
+</div>
+
+<!-- 4: BELLMAN-FORD -->
+<div class="panel" id="p4">
+<div class="algo-head"><h2>Bellman-Ford Algorithm</h2><p>Shortest paths with negative edges &amp; negative cycle detection</p></div>
+<div class="viz">
+<svg id="svg4" width="700" height="280"></svg>
+<div style="text-align:center;margin-top:8px" id="bfDist"></div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="prog4"></div></div>
+<div class="status" id="s4">Press Play or Step to begin</div>
+<div class="controls"><button class="btn b-play" id="play4">▶ Play</button><button class="btn b-step" id="step4">Next Step</button><button class="btn b-reset" id="reset4">Reset</button><div class="speed"><label>Speed</label><input type="range" min="200" max="1500" value="700" id="spd4"><span class="val" id="spdv4">0.7s</span></div></div>
+<div class="desc"><b>How:</b> Relax all edges V-1 times. If any distance still updates on the V-th pass, a negative cycle exists. <span class="cx">Time: O(VE) | Space: O(V)</span></div>
+<section class="dp-learning" id="dpLearn4"></section>
+</div>
+
+<!-- 5: FLOYD-WARSHALL -->
+<div class="panel" id="p5">
+<div class="algo-head"><h2>Floyd-Warshall Algorithm</h2><p>All-pairs shortest paths via intermediate vertices</p></div>
+<div class="viz">
+<div style="text-align:center;margin-bottom:8px" id="fwLabel"></div>
+<div id="fwMatrix" style="overflow-x:auto"></div>
+<div class="result" id="fwResult"></div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="prog5"></div></div>
+<div class="status" id="s5">Press Play or Step to begin</div>
+<div class="controls"><button class="btn b-play" id="play5">▶ Play</button><button class="btn b-step" id="step5">Next Step</button><button class="btn b-reset" id="reset5">Reset</button><div class="speed"><label>Speed</label><input type="range" min="300" max="2000" value="800" id="spd5"><span class="val" id="spdv5">0.8s</span></div></div>
+<div class="desc"><b>How:</b> For each intermediate vertex k, check if going through k gives shorter paths: dist[i][j] = min(dist[i][j], dist[i][k]+dist[k][j]). <span class="cx">Time: O(V³) | Space: O(V²)</span></div>
+<section class="dp-learning" id="dpLearn5"></section>
+</div>
+
+<!-- 6: EDIT DISTANCE -->
+<div class="panel" id="p6">
+<div class="algo-head"><h2>Edit Distance (Levenshtein)</h2><p>Minimum operations to transform one word into another</p></div>
+<div class="viz">
+<div class="strings" id="edStrs"></div>
+<div id="edTable" style="overflow-x:auto"></div>
+<div class="result" id="edResult"></div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="prog6"></div></div>
+<div class="status" id="s6">Press Play or Step to begin</div>
+<div class="controls"><button class="btn b-play" id="play6">▶ Play</button><button class="btn b-step" id="step6">Next Step</button><button class="btn b-reset" id="reset6">Reset</button><div class="speed"><label>Speed</label><input type="range" min="150" max="1200" value="500" id="spd6"><span class="val" id="spdv6">0.5s</span></div></div>
+<div class="desc"><b>How:</b> If chars match, take diagonal. Otherwise min(insert, delete, substitute) + 1. The bottom-right cell gives the answer. <span class="cx">Time: O(nm) | Space: O(nm)</span></div>
+<section class="dp-learning" id="dpLearn6"></section>
+</div>
+
+<!-- 7: KADANE -->
+<div class="panel" id="p7">
+<div class="algo-head"><h2>Kadane's Algorithm</h2><p>Maximum contiguous subarray sum in linear time</p></div>
+<div class="viz">
+<div id="kadBars" style="text-align:center"></div>
+<div class="steps-log" id="kadLog"></div>
+<div class="result" id="kadResult"></div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="prog7"></div></div>
+<div class="status" id="s7">Press Play or Step to begin</div>
+<div class="controls"><button class="btn b-play" id="play7">▶ Play</button><button class="btn b-step" id="step7">Next Step</button><button class="btn b-reset" id="reset7">Reset</button><div class="speed"><label>Speed</label><input type="range" min="150" max="1200" value="600" id="spd7"><span class="val" id="spdv7">0.6s</span></div></div>
+<div class="desc"><b>How:</b> At each position, either extend the current subarray or start fresh. current = max(arr[i], current+arr[i]). Track the global max. <span class="cx">Time: O(n) | Space: O(1)</span></div>
+<section class="dp-learning" id="dpLearn7"></section>
+</div>
+
+<!-- 8: EGG DROPPING -->
+<div class="panel" id="p8">
+<div class="algo-head"><h2>Egg Dropping Puzzle</h2><p>Minimum trials to find the critical floor</p></div>
+<div class="viz">
+<div style="text-align:center;margin-bottom:8px" id="eggInfo"></div>
+<div id="eggTable" style="overflow-x:auto"></div>
+<div class="result" id="eggResult"></div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="prog8"></div></div>
+<div class="status" id="s8">Press Play or Step to begin</div>
+<div class="controls"><button class="btn b-play" id="play8">▶ Play</button><button class="btn b-step" id="step8">Next Step</button><button class="btn b-reset" id="reset8">Reset</button><div class="speed"><label>Speed</label><input type="range" min="200" max="1500" value="700" id="spd8"><span class="val" id="spdv8">0.7s</span></div></div>
+<div class="desc"><b>How:</b> For e eggs and f floors, try dropping from floor x. min over all x of (max(breaks, doesn't break) + 1). Build table bottom-up. <span class="cx">Time: O(ef²) | Space: O(ef)</span></div>
+<section class="dp-learning" id="dpLearn8"></section>
+</div>
+</div>
+</main>
+</div>
+<div class="confetti" id="confetti"></div>
+<script src="dp-algorithms.js"></script><script src="dp-learning.js"></script>
+<script src="theme.js"></script>
+</div></div>
+<script src="enhance.js" defer></script></body>
+</html>

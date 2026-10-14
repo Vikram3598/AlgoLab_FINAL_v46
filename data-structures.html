@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data Structures | AlgoLab</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#060912;--card:#0a0a2e;--border:#1f2833;--accent:#00d4ff;--green:#48d0b0;--red:#ff6b6b;--gold:#f1c40f;--purple:#9b59b6;--pink:#e84393;--text:#e0e0e0;--dim:#667080}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;overflow-x:hidden}
+.bg{position:fixed;top:0;left:255px;width:calc(100% - 255px);height:100%;z-index:0;pointer-events:none;overflow:hidden}
+.bg .orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.12;animation:of 22s ease-in-out infinite}
+.bg .orb:nth-child(1){width:400px;height:400px;background:var(--accent);top:-100px;left:-100px}
+.bg .orb:nth-child(2){width:350px;height:350px;background:var(--purple);bottom:-100px;right:-100px;animation-delay:-8s}
+.bg .orb:nth-child(3){width:300px;height:300px;background:var(--gold);top:40%;left:55%;animation-delay:-15s}
+@keyframes of{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(70px,-50px) scale(1.15)}66%{transform:translate(-50px,70px) scale(.85)}}
+.header{position:relative;z-index:10;background:rgba(10,10,46,.92);backdrop-filter:blur(10px);padding:14px 25px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.logo{font-size:1.3rem;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sub{color:var(--dim);font-size:.75rem}
+.back-btn{padding:7px 16px;background:rgba(0,212,255,.1);border:1px solid var(--accent);border-radius:6px;color:var(--accent);font-size:.8rem;cursor:pointer;transition:all .2s;display:none}
+.back-btn:hover{background:rgba(0,212,255,.2);transform:translateX(-3px)}
+.back-btn.show{display:block}
+.home{position:relative;z-index:1;max-width:1060px;margin:0 auto;padding:50px 20px;text-align:center}
+.home h1{font-size:2.2rem;margin-bottom:8px;background:linear-gradient(135deg,var(--accent),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.home .tag{color:var(--dim);font-size:.95rem;margin-bottom:36px}
+.catwrap{margin-bottom:26px;text-align:left}
+.cat{font-size:1.02rem;font-weight:700;color:var(--purple);margin-bottom:12px;letter-spacing:.4px;display:flex;align-items:center;gap:10px}
+.cat::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(155,89,182,.4),transparent)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px;cursor:pointer;transition:all .3s;position:relative;overflow:hidden;text-align:left}
+.card::before{content:'';position:absolute;top:0;left:0;width:100%;height:3px;background:linear-gradient(90deg,var(--accent),var(--purple));transform:scaleX(0);transition:transform .3s;transform-origin:left}
+.card:hover{transform:translateY(-6px);border-color:var(--accent);box-shadow:0 12px 40px rgba(0,212,255,.15)}
+.card:hover::before{transform:scaleX(1)}
+.card .ico{font-size:2.2rem;margin-bottom:10px}
+.card h3{color:var(--accent);font-size:1.02rem;margin-bottom:7px}
+.card p{color:var(--dim);font-size:.78rem;line-height:1.6;margin-bottom:10px}
+.tags{display:flex;gap:8px;flex-wrap:wrap}
+.tag{font-size:.64rem;padding:4px 10px;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.22);border-radius:12px;color:var(--accent)}
+.tag.p{background:rgba(155,89,182,.12);border-color:rgba(155,89,182,.25);color:var(--purple)}
+.tag.r{background:rgba(255,107,107,.1);border-color:rgba(255,107,107,.2);color:var(--red)}
+.tag.g{background:rgba(72,208,176,.1);border-color:rgba(72,208,176,.2);color:var(--green)}
+.algo{position:relative;z-index:1;max-width:1150px;margin:0 auto;padding:20px}
+.panel{display:none}
+.panel.on{display:block}
+.algo-head{text-align:center;margin-bottom:18px}
+.algo-head h2{color:var(--accent);font-size:1.4rem;margin-bottom:4px}
+.algo-head p{color:var(--dim);font-size:.85rem}
+.viz{background:rgba(10,10,46,.7);border:1px solid var(--border);border-radius:16px;padding:22px;min-height:300px;margin-bottom:14px;position:relative;overflow:hidden;backdrop-filter:blur(5px)}
+.viz::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--accent),transparent);opacity:.5}
+.legend{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:12px}
+.lg{display:flex;align-items:center;gap:6px;font-size:.66rem;color:var(--dim)}
+.lg i{width:12px;height:12px;border-radius:3px;display:inline-block;border:1px solid rgba(255,255,255,.2)}
+.controls{display:flex;gap:10px;justify-content:center;margin-bottom:12px;flex-wrap:wrap;align-items:center}
+.btn{padding:10px 24px;border:none;border-radius:8px;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .2s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 4px 15px rgba(0,0,0,.3)}
+.btn:active{transform:translateY(0)}
+.b-play{background:linear-gradient(135deg,var(--accent),#0984e3);color:#060912}
+.b-step{background:rgba(0,212,255,.1);color:var(--accent);border:1px solid var(--accent)}
+.b-reset{background:rgba(255,107,107,.1);color:var(--red);border:1px solid var(--red)}
+.speed{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:6px 14px}
+.speed label{font-size:.7rem;color:var(--dim);text-transform:uppercase;letter-spacing:1px}
+.speed input[type=range]{width:80px;accent-color:var(--accent)}
+.speed .val{font-size:.75rem;color:var(--accent);font-weight:600;min-width:35px}
+.progress-bar{height:4px;background:var(--border);border-radius:2px;margin-bottom:12px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--purple));border-radius:2px;transition:width .3s;width:0%}
+.status{text-align:center;color:var(--dim);font-size:.88rem;min-height:24px;margin-bottom:12px;font-weight:500}
+.status.ok{color:var(--green)}.status.hl{color:var(--accent)}.status.err{color:var(--red)}
+.desc{background:rgba(15,15,39,.8);border:1px solid var(--border);border-radius:10px;padding:14px 18px;font-size:.78rem;color:var(--dim);line-height:1.7}
+.desc b{color:var(--accent)}
+.desc .cx{display:inline-block;margin-top:6px;padding:3px 10px;background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.18);border-radius:12px;color:var(--accent);font-size:.72rem;font-family:monospace}
+.result{background:rgba(72,208,176,.06);border:1px solid var(--green);border-radius:10px;padding:14px;text-align:center;margin-top:12px;font-size:1rem;color:var(--green);font-weight:700;display:none;animation:su .4s ease}
+.result.bad{border-color:var(--red);color:var(--red);background:rgba(255,107,107,.06)}
+.result.show{display:block}
+@keyframes su{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.log{max-height:150px;overflow-y:auto;padding:8px 10px;background:rgba(15,15,39,.6);border-radius:8px;margin-top:12px}
+.log-line{font-size:.74rem;color:var(--dim);padding:3px 0;border-bottom:1px solid rgba(31,40,51,.5);font-family:monospace}
+.log-line:last-child{border:none}
+.log-line.hl{color:var(--accent)}.log-line.ok{color:var(--green)}.log-line.bad{color:var(--red)}
+.sqwrap{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+.sq{min-width:34px;height:34px;padding:0 8px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.82rem;font-family:Consolas,monospace;background:rgba(15,15,39,.9);border:1.5px solid var(--border);color:var(--dim);transition:all .25s;animation:pop .2s}
+.sq.done{border-color:rgba(72,208,168,.5);color:rgba(72,208,168,.75)}
+.sq.cur{border-color:var(--accent);color:var(--accent);background:rgba(0,212,255,.12);transform:scale(1.12);box-shadow:0 0 10px rgba(0,212,255,.3)}
+.sq.op{border-color:var(--purple);color:var(--purple);background:rgba(155,89,182,.08);font-size:.7rem}
+@keyframes pop{from{transform:scale(.7);opacity:0}to{transform:scale(1);opacity:1}}
+.stats{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+.stat{padding:6px 14px;background:rgba(15,15,39,.8);border:1px solid var(--border);border-radius:8px;font-size:.72rem;color:var(--dim)}
+.stat b{color:var(--accent);font-size:.9rem;margin-left:4px}
+.err-msg{color:var(--red);text-align:center;padding:30px;font-size:.9rem}
+.confetti{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1000;overflow:hidden}
+.confetti .pc{position:absolute;top:-10px;animation:cf linear forwards}
+@keyframes cf{0%{top:-10px;opacity:1;transform:rotate(0)}100%{top:110%;opacity:0;transform:rotate(720deg)}}
+/* array search */
+.arr{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:14px 0}
+.acell{width:64px;border-radius:9px;background:#1a1d3e;border:1.5px solid #34495e;text-align:center;padding:9px 0 5px;transition:all .25s;animation:pop .2s}
+.acell .av{font-family:Consolas,monospace;font-size:1.15rem;font-weight:800;color:#9aa3b5}
+.acell .ai{font-size:.55rem;color:var(--dim);letter-spacing:1px;margin-top:2px}
+.acell.win{border-color:rgba(0,212,255,.5)}
+.acell.out{opacity:.3}
+.acell.probe{background:rgba(0,212,255,.14);border-color:var(--accent);transform:scale(1.1);box-shadow:0 0 14px rgba(0,212,255,.3);opacity:1}
+.acell.probe .av{color:var(--accent)}
+.acell.found{background:rgba(72,208,176,.3);border-color:var(--green);transform:scale(1.14);box-shadow:0 0 16px rgba(72,208,176,.4);opacity:1}
+.acell.found .av{color:var(--green)}
+.acell.sent{background:rgba(241,196,15,.16);border-color:var(--gold);opacity:1}
+.acell.sent .av{color:var(--gold)}
+.formula{text-align:center;font-family:Consolas,monospace;font-size:.95rem;color:var(--text);min-height:34px;animation:pop .3s;display:flex;flex-wrap:wrap;gap:5px;align-items:center;justify-content:center}
+.formula .sq{display:inline-flex;margin:0}
+.formula .qlab{color:var(--dim);font-size:.75rem;text-transform:uppercase;letter-spacing:1px;margin-right:4px}
+/* graph search */
+.gnodes{display:grid;grid-template-columns:repeat(3,74px);gap:12px 48px;justify-content:center;margin:14px 0}
+.gnode{width:74px;height:54px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.05rem;background:#1a1d3e;border:1.5px solid #34495e;color:#9aa3b5;transition:all .25s;animation:pop .2s;font-family:Consolas,monospace}
+.gnode.vst{background:rgba(72,208,176,.16);border-color:rgba(72,208,176,.6);color:var(--green)}
+.gnode.qd{background:rgba(155,89,182,.14);border-color:rgba(155,89,182,.65);color:var(--purple)}
+.gnode.cur{background:rgba(0,212,255,.16);border-color:var(--accent);color:var(--accent);transform:scale(1.14);box-shadow:0 0 14px rgba(0,212,255,.35)}
+.gelist{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:12px}
+.ge{padding:6px 8px;border:1px solid var(--border);border-radius:7px;font-family:Consolas,monospace;font-size:.78rem;color:var(--dim);text-align:center;transition:all .25s}
+.ge.tree{border-color:var(--green);color:var(--green);background:rgba(72,208,176,.1)}
+.ge.exp{border-color:var(--accent);color:var(--accent);background:rgba(0,212,255,.07)}
+/* BST */
+.tree{position:relative;width:340px;height:272px;margin:14px auto 6px}
+.tedge{position:absolute;width:1.5px;background:#34495e;transform-origin:top center;transition:background .25s}
+.tedge.on{background:var(--accent);box-shadow:0 0 7px rgba(0,212,255,.55)}
+.tnode{display:flex;flex-direction:column;align-items:center;position:relative}
+.tlabel{position:absolute;width:46px;height:40px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:Consolas,monospace;font-weight:800;font-size:.98rem;background:#1a1d3e;border:1.5px solid #34495e;color:#9aa3b5;transition:all .25s;animation:pop .2s;z-index:2}
+.tline{width:1.5px;height:16px;background:#34495e}
+.tkids{display:flex;gap:18px;position:relative;padding-top:16px}
+.tkids::before{content:'';position:absolute;top:0;left:23px;right:23px;height:1.5px;background:#34495e}
+.tk{position:relative;display:flex;flex-direction:column;align-items:center}
+.tk::before{content:'';position:absolute;top:-16px;left:calc(50% - .75px);width:1.5px;height:16px;background:#34495e}
+.tlabel.onpath{border-color:rgba(0,212,255,.7);color:var(--accent);background:rgba(0,212,255,.1)}
+.tlabel.cur{border-color:var(--gold);color:var(--gold);background:rgba(241,196,15,.14);transform:scale(1.14);box-shadow:0 0 12px rgba(241,196,15,.3)}
+.tlabel.hit{border-color:var(--green);color:var(--green);background:rgba(72,208,176,.3);transform:scale(1.16);box-shadow:0 0 16px rgba(72,208,176,.4)}
+/* primitives */
+.pinfo{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:14px 0 4px}
+.pbox{background:rgba(15,15,39,.9);border:1px solid var(--border);border-radius:10px;padding:8px 16px;text-align:center;min-width:104px;transition:all .25s;animation:pop .2s}
+.pbox .pk{font-size:.58rem;color:var(--dim);text-transform:uppercase;letter-spacing:1px}
+.pbox .pv{font-family:Consolas,monospace;font-size:1.12rem;font-weight:800;color:var(--accent);margin-top:3px}
+.pbox.hl{border-color:var(--accent);background:rgba(0,212,255,.1);box-shadow:0 0 12px rgba(0,212,255,.25)}
+.pbox.ok{border-color:var(--green);background:rgba(72,208,176,.1)}
+.pbox.ok .pv{color:var(--green)}
+.pbox.bad{border-color:var(--red);background:rgba(255,107,107,.1)}
+.pbox.bad .pv{color:var(--red)}
+.segrow{display:flex;justify-content:center;gap:3px;max-width:992px;margin:8px auto 4px}
+.seg{flex:1;font-size:.56rem;color:var(--dim);letter-spacing:1.5px;text-transform:uppercase;text-align:center;border-top:2px solid var(--purple);padding-top:3px;transition:all .25s}
+.seg.sign{border-color:var(--pink);color:var(--pink)}
+.seg.exp{border-color:var(--purple);color:var(--purple)}
+.seg.man{border-color:var(--gold);color:var(--gold)}
+.bits{display:flex;gap:3px;justify-content:center;flex-wrap:wrap;margin:6px 0 4px}
+.pbit{width:27px;height:34px;border-radius:6px;background:#1a1d3e;border:1.5px solid #34495e;display:flex;align-items:center;justify-content:center;font-family:Consolas,monospace;font-size:.9rem;font-weight:800;color:#3d4757;transition:all .25s;animation:pop .2s}
+.pbit.on{color:var(--accent);border-color:rgba(0,212,255,.5);background:rgba(0,212,255,.09)}
+.pbit.sign{border-color:rgba(232,67,147,.55)}
+.pbit.exp{border-color:rgba(155,89,182,.55)}
+.pbit.man{border-color:rgba(241,196,15,.5)}
+.pbit.hl{transform:scale(1.2);box-shadow:0 0 12px rgba(0,212,255,.55);border-color:var(--accent);color:var(--accent);background:rgba(0,212,255,.22);z-index:2}
+.pbit.ok{border-color:var(--green);color:var(--green);background:rgba(72,208,176,.22)}
+/* generic cell row */
+.cells{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:22px 0 4px;align-items:flex-end}
+.cell{min-width:58px;border-radius:9px;background:#1a1d3e;border:1.5px solid #34495e;text-align:center;padding:13px 8px 5px;position:relative;transition:all .25s;animation:pop .2s}
+.cell .cv{font-family:Consolas,monospace;font-size:1.05rem;font-weight:800;color:#9aa3b5}
+.cell .ci{font-size:.55rem;color:var(--dim);letter-spacing:1px;margin-top:2px}
+.cell .ct{position:absolute;top:-9px;left:50%;transform:translateX(-50%);font-size:.5rem;padding:1px 7px;border-radius:8px;background:var(--card);border:1px solid rgba(0,212,255,.5);color:var(--accent);white-space:nowrap}
+.cell .ct.g{border-color:var(--gold);color:var(--gold)}
+.cell.empty{border-style:dashed;opacity:.55}
+.cell.empty .cv{color:#39414f}
+.cell.hl{border-color:var(--accent);background:rgba(0,212,255,.14);transform:translateY(-6px);box-shadow:0 0 14px rgba(0,212,255,.3)}
+.cell.hl .cv{color:var(--accent)}
+.cell.ok{border-color:var(--green);background:rgba(72,208,176,.22);transform:translateY(-6px);box-shadow:0 0 14px rgba(72,208,176,.3)}
+.cell.ok .cv{color:var(--green)}
+.cell.bad{border-color:var(--red);background:rgba(255,107,107,.16);transform:translateY(-6px)}
+.cell.bad .cv{color:var(--red)}
+.cell.gone{opacity:.25;transform:scale(.85)}
+.cell.move{border-color:var(--gold);background:rgba(241,196,15,.16)}
+.cell.move .cv{color:var(--gold)}
+.dirline{width:100%;text-align:center;font-size:.66rem;color:var(--dim);letter-spacing:2px;margin-top:14px;font-family:Consolas,monospace}
+/* linked list */
+.list{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;margin:26px 0 4px}
+.lnode{min-width:64px;padding:10px 6px 7px;background:#1a1d3e;border:1.5px solid #34495e;border-radius:9px;text-align:center;transition:all .25s;animation:pop .2s;position:relative}
+.lnode .lv{font-family:Consolas,monospace;font-weight:800;font-size:1rem;color:#9aa3b5}
+.lnode .ltag{position:absolute;top:-10px;left:50%;transform:translateX(-50%);font-size:.5rem;padding:1px 6px;border-radius:8px;background:var(--card);border:1px solid rgba(0,212,255,.5);color:var(--accent);white-space:nowrap}
+.lnode .ltag.g{border-color:var(--gold);color:var(--gold)}
+.lnode.hl{border-color:var(--accent);background:rgba(0,212,255,.12);transform:translateY(-5px)}
+.lnode.hl .lv{color:var(--accent)}
+.lnode.ok{border-color:var(--green);background:rgba(72,208,176,.24);transform:translateY(-5px)}
+.lnode.ok .lv{color:var(--green)}
+.lnode.bad{border-color:var(--red);background:rgba(255,107,107,.2)}
+.lnode.bad .lv{color:var(--red)}
+.lnode.gone{opacity:.28}
+.larrow{padding:0 7px;color:#4a5568;font-size:1.15rem;transition:color .25s;animation:pop .2s}
+.larrow.dbl{color:var(--purple)}
+.larrow.hl{color:var(--accent);text-shadow:0 0 8px rgba(0,212,255,.6)}
+.lnull{padding:9px 13px;border:1.5px dashed var(--dim);border-radius:9px;color:var(--dim);font-size:.7rem;font-family:Consolas,monospace;margin-left:6px}
+.lwrap{text-align:center;color:var(--gold);font-size:.72rem;min-height:18px;margin-top:8px;font-family:Consolas,monospace}
+/* binary tree (absolute layout, sized by renderer) */
+.tree{position:relative;width:auto;height:auto;margin:18px auto 8px}
+.tedge{position:absolute;width:1.5px;background:#34495e;transform-origin:top center;transition:background .25s}
+.tedge.on{background:var(--accent);box-shadow:0 0 7px rgba(0,212,255,.55)}
+.tlabel{position:absolute;width:46px;height:40px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:Consolas,monospace;font-weight:800;font-size:.98rem;background:#1a1d3e;border:1.5px solid #34495e;color:#9aa3b5;transition:all .25s;animation:pop .2s;z-index:2}
+.tlabel.onpath{border-color:rgba(0,212,255,.7);color:var(--accent);background:rgba(0,212,255,.1)}
+.tlabel.cur{border-color:var(--gold);color:var(--gold);background:rgba(241,196,15,.14);transform:scale(1.14);box-shadow:0 0 12px rgba(241,196,15,.3)}
+.tlabel.hit{border-color:var(--green);color:var(--green);background:rgba(72,208,176,.3);transform:scale(1.16);box-shadow:0 0 16px rgba(72,208,176,.4)}
+.tlabel.newn{border-color:var(--green);color:var(--green);background:rgba(72,208,176,.28);transform:scale(1.14);box-shadow:0 0 14px rgba(72,208,176,.4)}
+.tlabel.bad{border-color:var(--red);color:var(--red);background:rgba(255,107,107,.22);transform:scale(1.14);box-shadow:0 0 14px rgba(255,107,107,.45)}
+.tlabel.split{border-color:var(--red);color:var(--red);background:rgba(255,107,107,.2);box-shadow:0 0 14px rgba(255,107,107,.4)}
+.tlabel.red{border-color:#ff6b6b;background:rgba(255,107,107,.32);color:#ffc2c2}
+.tlabel.black{border-color:#2f3b47;background:#131826;color:#aab4c2}
+.tlabel.red.cur{border-color:var(--gold)}
+.tbadge{position:absolute;bottom:-15px;left:50%;transform:translateX(-50%);font-size:.5rem;padding:0 6px;border-radius:7px;background:rgba(155,89,182,.3);border:1px solid rgba(155,89,182,.55);color:#d7b6ee;white-space:nowrap}
+/* b-tree */
+.btree{position:relative;margin:20px auto 10px}
+.bnode{position:absolute;display:flex;gap:5px;padding:6px;background:#12161f;border:1.5px solid #34495e;border-radius:11px;transition:all .25s;animation:pop .2s}
+.bkey{min-width:34px;padding:6px 7px;border-radius:7px;background:#1a1d3e;border:1px solid #34495e;font-family:Consolas,monospace;font-weight:800;font-size:.9rem;color:#9aa3b5;text-align:center;transition:all .25s}
+.bnode.hl{border-color:var(--accent);box-shadow:0 0 12px rgba(0,212,255,.3)}
+.bnode.hl .bkey{color:var(--accent);border-color:rgba(0,212,255,.5);background:rgba(0,212,255,.12)}
+.bnode.split{border-color:var(--red);box-shadow:0 0 16px rgba(255,107,107,.4)}
+.bnode.split .bkey{border-color:rgba(255,107,107,.5)}
+.bnode.newn{border-color:var(--green);box-shadow:0 0 14px rgba(72,208,176,.4)}
+.bnode.promo{border-color:var(--gold);box-shadow:0 0 16px rgba(241,196,15,.4)}
+.bnode.promo .bkey{color:var(--gold);border-color:rgba(241,196,15,.5)}
+.bedge{position:absolute;width:1.5px;background:#34495e;transform-origin:top center}
+/* trie */
+.trie{position:relative;margin:20px auto 8px}
+.trn{position:absolute;width:34px;height:34px;border-radius:50%;border:1.5px solid #34495e;background:#1a1d3e;color:#9aa3b5;display:flex;align-items:center;justify-content:center;font-family:Consolas,monospace;font-weight:800;font-size:.9rem;transition:all .25s;animation:pop .2s;z-index:2}
+.trn.root{border-color:var(--purple);color:var(--purple);background:rgba(155,89,182,.16)}
+.trn.term{border-color:var(--green);color:var(--green);background:rgba(72,208,176,.2)}
+.trn.term::after{content:'\2605';position:absolute;top:-10px;right:-8px;font-size:.62rem;color:var(--gold);text-shadow:0 0 6px rgba(241,196,15,.6)}
+.trn.hl{border-color:var(--accent);color:var(--accent);background:rgba(0,212,255,.2);transform:scale(1.18);box-shadow:0 0 14px rgba(0,212,255,.45)}
+.trn.miss{border-color:var(--red);color:var(--red);background:rgba(255,107,107,.25);transform:scale(1.18);box-shadow:0 0 14px rgba(255,107,107,.45)}
+.tredge{position:absolute;width:1.5px;background:#34495e;transform-origin:top center;transition:background .25s}
+.tredge.on{background:var(--accent);box-shadow:0 0 7px rgba(0,212,255,.55)}
+/* adjacency list */
+.alist{margin-top:14px;display:flex;flex-direction:column;gap:6px;max-width:620px;margin-left:auto;margin-right:auto}
+.arow{display:flex;align-items:center;gap:8px;justify-content:center;flex-wrap:wrap;font-family:Consolas,monospace;font-size:.8rem;color:var(--dim);background:rgba(15,15,39,.7);border:1px solid var(--border);border-radius:8px;padding:6px 12px;transition:all .25s}
+.arow.hl{border-color:var(--accent);color:var(--accent);background:rgba(0,212,255,.07)}
+.arow .an{color:var(--accent);font-weight:800;min-width:16px;text-align:center}
+.aw{padding:1px 8px;border-radius:9px;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.3);color:var(--accent);font-size:.72rem;transition:all .25s}
+.aw.w{background:rgba(241,196,15,.14);border-color:rgba(241,196,15,.4);color:var(--gold)}
+.aw.done{background:rgba(72,208,176,.16);border-color:rgba(72,208,176,.5);color:var(--green)}
+.aw.dim{opacity:.35}
+.aw.miss{border-color:rgba(255,107,107,.4);color:var(--red);background:rgba(255,107,107,.1)}
+/* hash buckets */
+.buckets{display:flex;flex-direction:column;gap:7px;margin:16px 0 6px;max-width:580px;margin-left:auto;margin-right:auto}
+.brow{display:flex;align-items:center;gap:10px;border:1px solid var(--border);border-radius:9px;padding:7px 10px;background:rgba(15,15,39,.65);transition:all .25s;animation:pop .2s}
+.bidx{width:36px;height:32px;flex:none;border-radius:7px;background:#1a1d3e;border:1px solid #34495e;display:flex;align-items:center;justify-content:center;font-family:Consolas,monospace;font-weight:800;font-size:.8rem;color:var(--dim);transition:all .25s}
+.brow.hl{border-color:var(--accent);background:rgba(0,212,255,.08);box-shadow:0 0 10px rgba(0,212,255,.2)}
+.brow.hl .bidx{border-color:var(--accent);color:var(--accent);background:rgba(0,212,255,.12)}
+.bchain{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.bchip{padding:5px 11px;border-radius:9px;background:#1a1d3e;border:1.5px solid #34495e;font-family:Consolas,monospace;font-weight:700;font-size:.8rem;color:#9aa3b5;transition:all .25s;animation:pop .2s}
+.bchip.hl{border-color:var(--accent);color:var(--accent);background:rgba(0,212,255,.14);transform:scale(1.1);box-shadow:0 0 12px rgba(0,212,255,.3)}
+.bchip.ok{border-color:var(--green);color:var(--green);background:rgba(72,208,176,.22);transform:scale(1.08)}
+.bchip.collide{border-color:var(--gold);color:var(--gold);background:rgba(241,196,15,.15);transform:scale(1.1)}
+.bchip.gone{opacity:.3;text-decoration:line-through}
+.bchip.bad{border-color:var(--red);color:var(--red);background:rgba(255,107,107,.15)}
+.barrow{color:#4a5568;font-size:.9rem}
+.bempty{color:#39414f;font-size:.72rem;font-style:italic}
+.ds-home-link{display:inline-flex;align-items:center;padding:7px 12px;border:1px solid rgba(0,212,255,.45);border-radius:7px;background:rgba(0,212,255,.08);color:var(--accent);text-decoration:none;font-size:.78rem;font-weight:600;white-space:nowrap;transition:background .2s,transform .2s}
+.ds-home-link:hover{background:rgba(0,212,255,.16);transform:translateY(-1px)}
+@media(max-width:900px){.bg{left:0;width:100%}}
+@media(max-width:620px){.header{padding:12px;gap:10px;flex-wrap:wrap}.ds-home-link{order:3}.header .sub{margin-left:auto}}
+</style>
+<style id="shared-shell-style">
+/* Shared navigation shell; the original educational canvas and simulation styles remain page-specific. */
+.shared-shell{min-height:100vh;display:flex;align-items:stretch;background:var(--ui-bg,#07111d);color:var(--ui-text,#f5f7fa)}
+.shared-sidebar{width:255px;flex:0 0 255px;background:#081523;border-right:1px solid var(--ui-line,#24425d);padding:24px 16px;display:flex;flex-direction:column;gap:12px;min-height:100vh;position:sticky;top:0;height:100vh;overflow:auto;z-index:100}
+.shared-brand{display:flex;gap:12px;align-items:center;padding:4px 8px 20px;text-decoration:none;color:inherit}
+.shared-brand-mark{width:40px;height:40px;flex:0 0 40px;border-radius:12px;background:linear-gradient(135deg,#22d3ee,#2385f2);display:grid;place-items:center;font-size:22px;font-weight:800;color:#07111d}
+.shared-brand b{display:block;font-size:19px;line-height:1.2;color:var(--ui-text,#f5f7fa)}
+.shared-brand small{display:block;font-size:11px;color:var(--ui-muted,#8ea6bb);margin-top:3px}
+.shared-home{display:block;text-decoration:none;padding:10px 12px;border:1px solid var(--ui-line,#24425d);border-radius:9px;color:var(--ui-muted,#8ea6bb);font-size:13px}
+.shared-home:hover{color:var(--ui-text,#f5f7fa);border-color:var(--ui-accent,#22d3ee)}
+.shared-side-title{font-size:10px;letter-spacing:1.5px;color:var(--ui-muted,#8ea6bb);font-weight:800;padding:8px 10px 2px}
+.shared-nav{display:flex;flex-direction:column;gap:3px}
+.shared-nav .nav-item{display:block;text-decoration:none;width:100%;border:1px solid transparent;background:transparent;color:var(--ui-muted,#8ea6bb);text-align:left;padding:9px 11px;border-radius:9px;margin:0;font:600 12px/1.35 var(--ui-font,Inter,"Segoe UI",Arial,sans-serif)}
+.shared-nav .nav-item:hover{background:var(--ui-panel-2,#102a43);color:var(--ui-text,#f5f7fa)}
+.shared-nav .nav-item.active{background:var(--ui-panel-2,#102a43);border-color:var(--ui-line,#24425d);color:var(--ui-text,#f5f7fa)}
+.shared-nav .nav-item small{display:block;color:var(--ui-muted,#8ea6bb);font-size:10px;font-weight:400;margin-top:3px}
+.shared-theme{width:100%;min-height:38px;border:1px solid var(--ui-line,#24425d);border-radius:9px;background:var(--ui-panel-2,#102a43);color:var(--ui-text,#f5f7fa);font:700 12px/1.2 var(--ui-font,Inter,"Segoe UI",Arial,sans-serif);padding:9px 11px;text-align:left;cursor:pointer}
+.shared-note{margin-top:auto;border:1px solid var(--ui-line,#24425d);background:var(--ui-panel,#0b1b2b);padding:12px;border-radius:12px;color:var(--ui-muted,#8ea6bb);font-size:12px}
+.shared-note b{color:var(--ui-accent,#22d3ee)}.shared-note p{margin:6px 0 0;font-size:12px;line-height:1.5}
+.shared-main{flex:1;min-width:0;width:calc(100% - 255px);padding:20px 26px;}
+body[data-theme="light"] .shared-shell{background:var(--ui-bg,#f2f6fa);color:var(--ui-text,#102033)}
+body[data-theme="light"] .shared-sidebar{background:#fff;border-color:var(--ui-line,#b7c7d6)}
+body[data-theme="light"] .shared-brand b{color:#152235}
+body[data-theme="light"] .shared-home,body[data-theme="light"] .shared-nav .nav-item{color:#465d73}
+body[data-theme="light"] .shared-nav .nav-item.active{background:#edf3f7;color:#152235;border-color:#b7c7d6}
+body[data-theme="light"] .shared-theme{background:#f7fafc;color:#102033;border-color:#b7c7d6}
+@media(max-width:900px){.shared-shell{display:block}.shared-sidebar{position:relative;width:100%;height:auto;min-height:0;max-height:none;overflow:visible;padding:12px;gap:8px;border-right:0;border-bottom:1px solid var(--ui-line,#24425d)}.shared-brand{padding:2px 4px 8px}.shared-nav{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:5px}.shared-note{display:none}.shared-main{width:100%;padding:14px}}
+</style>
+<link rel="stylesheet" href="design-system.css">
+
+<style id="data-structures-theme-fixes">
+body[data-theme="light"]{--bg:#f2f6fa;--card:#ffffff;--border:#c8d5e1;--text:#152235;--dim:#52677d;background:var(--bg);color:var(--text)}
+body[data-theme="light"] .header{background:rgba(255,255,255,.95);border-color:var(--border)}
+body[data-theme="light"] .home .tag,body[data-theme="light"] .sub{color:var(--dim)}
+body[data-theme="light"] .card,body[data-theme="light"] .panel,body[data-theme="light"] .viz,body[data-theme="light"] .result-box,body[data-theme="light"] .control-panel{background:var(--card);border-color:var(--border);color:var(--text)}
+body[data-theme="light"] .card p,body[data-theme="light"] .panel p,body[data-theme="light"] .algo-head p{color:var(--dim)}
+body[data-theme="light"] .bg .orb{opacity:.06}
+</style>
+<link rel="stylesheet" href="enhance.css"></head>
+<body data-theme="dark">
+<div class="shared-shell" id="sharedAlgoLabShell">
+<aside class="shared-sidebar" aria-label="AlgoLab navigation">
+<a class="shared-brand" href="index.html"><span class="shared-brand-mark">A</span><span><b>AlgoLab</b><small>INTERACTIVE LEARNING STUDIO</small></span></a>
+<a class="shared-home" href="index.html">← All learning labs</a>
+<div class="shared-side-title">LEARNING LABS</div>
+<nav class="shared-nav" id="sharedAlgoLabNav" aria-label="Learning labs"><a class="nav-item" href="sorting.html"><span>Sorting Algorithms</span><small>Core algorithm lab</small></a><a class="nav-item" href="searching.html"><span>Searching Algorithms</span><small>Array, tree and graph search</small></a><a class="nav-item" href="greedy.html"><span>Greedy Algorithms</span><small>Optimization strategies</small></a><a class="nav-item" href="dp.html"><span>Dynamic Programming</span><small>Subproblems and recurrence</small></a><a class="nav-item" href="graph.html"><span>Graph Algorithms</span><small>Traversal and graph structure</small></a><a class="nav-item active" href="data-structures.html" aria-current="page"><span>Data Structures</span><small>Foundational structures</small></a><a class="nav-item" href="hanoi.html"><span>Tower of Hanoi</span><small>Recursion and puzzles</small></a><a class="nav-item" href="string-matching.html"><span>String Matching</span><small>Text and pattern algorithms</small></a><a class="nav-item" href="backtracking.html"><span>Backtracking Algorithms</span><small>Search and constraints</small></a><a class="nav-item" href="branch-bound.html"><span>Branch and Bound</span><small>Exact optimization</small></a><a class="nav-item" href="advanced-data-structures.html"><span>Advanced Data Structures</span><small>Trees, queries and sets</small></a><a class="nav-item" href="cryptography-math.html"><span>Cryptography &amp; Mathematical Algorithms</span><small>Number theory and security</small></a><a class="nav-item" href="advanced-network-flows.html"><span>Advanced Network Flows &amp; Approximation</span><small>Flows and approximation</small></a></nav>
+<button type="button" class="shared-theme" id="themeToggle" aria-label="Switch theme">☾ Dark theme</button>
+<div class="shared-note"><b>Learning mode</b><p>Explore the visualizer, follow the steps, and review the structure's properties and operations.</p></div>
+</aside>
+<div class="shared-main" id="sharedMainContent">
+<div class="bg"><div class="orb"></div><div class="orb"></div><div class="orb"></div></div>
+<div class="header"><a class="ds-home-link" href="index.html">← AlgoLab Home</a><div class="logo">Data Structures</div><button class="back-btn" id="backBtn">&#8592; Home</button><div class="sub">Interactive Visualizer</div></div>
+
+<div class="home" id="homeScreen">
+<h1>Data Structures</h1>
+<p class="tag">From primitive types to trees, graphs and hash tables — 27 structures, animated operation by operation</p>
+<div class="catwrap">
+<div class="cat">Primitive Types</div>
+<div class="cards"><div class="card" data-a="0"><div class="ico"> </div><h3>Integer (int32)</h3><p>Signed 32-bit whole numbers use two's-complement representation, with a range from −2³¹ to 2³¹−1 — the format behind many array indices, loop counters and size fields.</p><div class="tags"><span class="tag">4 bytes</span><span class="tag p">two's complement</span><span class="tag g">range −2³¹ to 2³¹−1</span></div></div><div class="card" data-a="1"><div class="ico"> </div><h3>Float (IEEE-754)</h3><p>IEEE-754 single precision uses 1 sign bit, 8 exponent bits and a 23-bit fraction field — see where rounding error comes from.</p><div class="tags"><span class="tag">1 + 8 + 23 bits</span><span class="tag p">normalized</span><span class="tag g">bias 127</span></div></div><div class="card" data-a="2"><div class="ico"> </div><h3>Character</h3><p>A character is just a small integer: A = 65, a = 97, and one bit separates upper from lower case.</p><div class="tags"><span class="tag">7-bit ASCII</span><span class="tag p">case = bit 5</span><span class="tag g">Unicode extends</span></div></div><div class="card" data-a="3"><div class="ico"> </div><h3>Boolean</h3><p>A logical value with two states, true or false; implementations commonly encode these as 1 and 0.</p><div class="tags"><span class="tag">true / false</span><span class="tag p">1 bit logic</span><span class="tag g">flags everywhere</span></div></div></div>
+</div>
+<div class="catwrap">
+<div class="cat">Linear Structures</div>
+<div class="cards"><div class="card" data-a="4"><div class="ico"> </div><h3>Static Array</h3><p>A fixed run of memory slots — instant O(1) indexing by address arithmetic, but the size can never change.</p><div class="tags"><span class="tag">O(1) index</span><span class="tag p">contiguous</span><span class="tag r">fixed size</span></div></div><div class="card" data-a="5"><div class="ico"> </div><h3>Dynamic Array</h3><p>A resizable array that doubles its capacity when full, copying the old data once in a while.</p><div class="tags"><span class="tag">amortized O(1)</span><span class="tag p">double on full</span><span class="tag g">copy cost spread</span></div></div><div class="card" data-a="6"><div class="ico">➡️</div><h3>Singly Linked List</h3><p>Nodes chained in one direction — O(1) insert at the head, but you must walk to reach anything else.</p><div class="tags"><span class="tag">O(1) push front</span><span class="tag p">one-directional</span><span class="tag r">O(n) search</span></div></div><div class="card" data-a="7"><div class="ico">↔️</div><h3>Doubly Linked List</h3><p>Every node keeps a prev pointer too, so traversal and known-node deletion become cheap.</p><div class="tags"><span class="tag">O(1) delete</span><span class="tag p">bidirectional</span><span class="tag g">2 pointers</span></div></div><div class="card" data-a="8"><div class="ico"> </div><h3>Circular Linked List</h3><p>No NULL at the end — the last node links to the first, giving round-robin traversal without a sentinel.</p><div class="tags"><span class="tag">wrap-around</span><span class="tag p">round robin</span><span class="tag g">no NULL end</span></div></div><div class="card" data-a="9"><div class="ico"> </div><h3>Stack (LIFO)</h3><p>A pile: push and pop only at the top — undo history, call frames and depth-first search all live here.</p><div class="tags"><span class="tag">O(1) push/pop</span><span class="tag p">LIFO</span><span class="tag g">undo / DFS</span></div></div><div class="card" data-a="10"><div class="ico"> </div><h3>Queue (FIFO)</h3><p>A line at a counter: enqueue at the back, dequeue at the front — BFS and print jobs use it.</p><div class="tags"><span class="tag">O(1) enqueue</span><span class="tag p">FIFO</span><span class="tag g">BFS uses it</span></div></div><div class="card" data-a="11"><div class="ico"> </div><h3>Circular Queue</h3><p>A fixed-size queue laid out as a ring, so dequeued space is reused instead of wasting the front.</p><div class="tags"><span class="tag">ring buffer</span><span class="tag p">O(1) ops</span><span class="tag g">no wasted slots</span></div></div><div class="card" data-a="12"><div class="ico"> </div><h3>Deque</h3><p>A queue where you may add or remove at the front and at the back in O(1).</p><div class="tags"><span class="tag">O(1) 4 ops</span><span class="tag p">double ended</span><span class="tag g">FIFO + LIFO</span></div></div><div class="card" data-a="13"><div class="ico"> </div><h3>Priority Queue</h3><p>Not FIFO — elements leave in priority order, implemented as a binary heap array.</p><div class="tags"><span class="tag">O(log n)</span><span class="tag p">heap-backed</span><span class="tag g">Dijkstra uses it</span></div></div></div>
+</div>
+<div class="catwrap">
+<div class="cat">Non-Linear Structures</div>
+<div class="cards"><div class="card" data-a="14"><div class="ico"> </div><h3>Binary Tree</h3><p>The root of all tree structures — walk it in pre-order, in-order, post-order or level-order.</p><div class="tags"><span class="tag">O(n) traverse</span><span class="tag p">4 orders</span><span class="tag g">height h tree</span></div></div><div class="card" data-a="15"><div class="ico"> </div><h3>Binary Search Tree</h3><p>Keys ordered so search, insert and delete all follow a single root-to-leaf path.</p><div class="tags"><span class="tag">O(h)</span><span class="tag p">sorted walk</span><span class="tag r">degenerates to list</span></div></div><div class="card" data-a="16"><div class="ico">⚖️</div><h3>AVL Tree</h3><p>The first self-balancing BST — rotations fire the moment a subtree grows one level too tall.</p><div class="tags"><span class="tag">O(log n)</span><span class="tag p">|bf| ≤ 1</span><span class="tag g">4 rotation cases</span></div></div><div class="card" data-a="17"><div class="ico"> </div><h3>Red-Black Tree</h3><p>A relaxed balancing scheme — recolor and rotate only on demand, so it rebalances less often than AVL.</p><div class="tags"><span class="tag">O(log n)</span><span class="tag p">≤ 2 rotations</span><span class="tag g">STL map</span></div></div><div class="card" data-a="18"><div class="ico"> </div><h3>B-Tree / B+ Tree</h3><p>Wide, shallow tree with many keys per node — the index behind every database and filesystem.</p><div class="tags"><span class="tag">O(log m n)</span><span class="tag p">disk friendly</span><span class="tag g">splits on overflow</span></div></div><div class="card" data-a="19"><div class="ico">⛰️</div><h3>Binary Heap</h3><p>A priority queue you can store in a plain array — sift up on insert, sift down on extract.</p><div class="tags"><span class="tag">O(log n)</span><span class="tag p">array indices</span><span class="tag g">complete tree</span></div></div><div class="card" data-a="20"><div class="ico"> </div><h3>Trie (Prefix Tree)</h3><p>A tree keyed by characters — every path from the root spells a word, shared prefixes share nodes.</p><div class="tags"><span class="tag">O(word length)</span><span class="tag p">shared prefixes</span><span class="tag g">autofill</span></div></div><div class="card" data-a="21"><div class="ico"> </div><h3>Directed Graph (Digraph)</h3><p>Vertices joined by arrows: out-degree of a node counts its outgoing edges, and order matters.</p><div class="tags"><span class="tag">O(V+E)</span><span class="tag p">one-way edges</span><span class="tag g">adjacency list</span></div></div><div class="card" data-a="22"><div class="ico"> </div><h3>Undirected Graph</h3><p>Symmetric connections: every edge contributes one to the degree of each endpoint, so all degrees sum to twice the number of edges.</p><div class="tags"><span class="tag">Σdeg = 2E</span><span class="tag p">symmetric edges</span><span class="tag g">degree counting</span></div></div><div class="card" data-a="23"><div class="ico"> </div><h3>Weighted Graph + Dijkstra</h3><p>Numbers on the edges: Dijkstra settles the nearest unvisited vertex each round until the target is final.</p><div class="tags"><span class="tag">O((V+E) log V)</span><span class="tag p">greedy</span><span class="tag g">shortest path</span></div></div></div>
+</div>
+<div class="catwrap">
+<div class="cat">Hash-Based Structures</div>
+<div class="cards"><div class="card" data-a="24"><div class="ico"> </div><h3>Hash Table</h3><p>Direct addressing by hash: compute a bucket instantly, and chain collisions into that slot.</p><div class="tags"><span class="tag">avg O(1)</span><span class="tag p">key mod 7</span><span class="tag g">chaining</span></div></div><div class="card" data-a="25"><div class="ico"> </div><h3>Hash Map</h3><p>The dictionary: store associations and fetch any one of them in expected constant time.</p><div class="tags"><span class="tag">avg O(1) get</span><span class="tag p">key → value</span><span class="tag g">collision chain</span></div></div><div class="card" data-a="26"><div class="ico"> </div><h3>Hash Set</h3><p>A set built on hashing: no duplicates, and contains(x) answers instantly.</p><div class="tags"><span class="tag">avg O(1)</span><span class="tag p">no duplicates</span><span class="tag g">membership test</span></div></div></div>
+</div>
+</div>
+
+<div class="algo" id="algoScreen" style="display:none">
+<div class="panel on" id="p0">
+<div class="algo-head"><h2>Integer (int32)</h2><p>Sign bit plus two's complement in 32 bits</p></div>
+<div class="viz">
+<div class="legend"><span class="lg"><i style="background:rgba(0,212,255,.5);border-color:#00d4ff"></i>bit = 1</span><span class="lg"><i style="background:#1a1d3e;opacity:.5"></i>bit = 0</span><span class="lg"><i style="background:rgba(232,67,147,.45);border-color:#e84393"></i>sign</span><span class="lg"><i style="background:rgba(155,89,182,.45);border-color:#9b59b6"></i>exponent</span><span class="lg"><i style="background:rgba(241,196,15,.45);border-color:#f1c40f"></i>mantissa</span></div>
+<div class="sqwrap" id="ops0"></div>
+<div class="pinfo" id="pinfo0"></div>
+<div class="segrow" id="segrow0"></div>
+<div class="bits" id="bits0"></div>
+<div class="formula" id="ft0"></div>
+<div class="stats" id="stats0"></div>
+<div class="log" id="log0"></div>
+<div class="result" id="res0"></div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="prog0"></div></div>
+<div class="status" id="s0">Press Play or Step to begin</div>
+<div class="controls"><button class="btn b-play" id="play0">&#9654; Play</button><button class="btn b-step" id="step0">Next Step</button><button class="btn b-reset" id="reset0">Reset</button><div class="speed"><label>Speed</label><input type="range" min="150" max="1500" value="550" id="spd0"><span class="val" id="spdv0">0.55s</span></div></div>
+<div class="desc"><b>How:</b> Store a signed whole number in 32 bits. Positive 13 is found by repeated division by two — read the remainders bottom to top to get 1101. To represent −13, invert every bit of 13 and add one: two's complement lets the CPU use the same arithmetic circuitry for addition and subtraction. <span class="cx">int32: −2³¹ … 2³¹−1 | 4 bytes | O(1) arithmetic</span></div>
+</div>
+
+<div class="panel" id="p1">
+<div class="algo-head"><h2>Float (IEEE-754)</h2><p>Sign, exponent and 23-bit mantissa</p></div>
+<div class="viz">
+<div class="legend"><span class="lg"><i style="background:rgba(0,212,255,.5);border-color:#00d4ff"></i>bit = 1</span><span class="lg"><i style="background:#1a1d3e;opacity:.5"></i>bit = 0</span><span class="lg"><i style="background:rgba(232,67,147,.45);border-color:#e84393"></i>sign</span><span class="lg"><i style="background:rgba(155,89,182,.45);border-color:#9b59b6"></i>exponent</span><span class="lg"><i style="background:rgba(241,196,15,.45);border-color:#f1c40f"></i>mantissa</span></div>
+<div class="sqwrap" id="ops1"></div>
+<div class="pinfo" id="pinfo1"></div>
+<div class="segrow" id="segrow1"></div>
+<div class="bits" id="bits1"></div>
+<div class="formula" id="ft1"></div>
+<div class="stats" id="stats1"></div>
+<div class="log" id="log1"></div>
+<div class="result" id="res1"></div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="prog1"></div></div>
+<div class="status" id="s1">Press Play or Step to begin</div>
+<div class="controls"><button class="btn b-play" id="play1">&#9654; Play</button><button class="btn b-step" id="step1">Next Step</button><button class="btn b-reset" id="reset1">Reset</button><div class="speed"><label>Speed</label><input type="range" min="150" max="1500" value="550" id="spd1"><span class="val" id="spdv1">0.55s</span></div></div>
+<div class="desc"><b>How:</b> Split 32 bits into three fields: a sign bit, an 8-bit biased exponent (127 + power of two) and a 23-bit fraction. Normalize 3.14 = 1.10010001111010111000011 × 21, bias the exponent to 128, then read back the stored value — it is not exactly 3.14. <span class="cx">float32: ~7 significant digits | 4 bytes | rounding error 1.05e-7</span></div>
+</div>
+
+<div class="panel" id="p2">
+<div class="algo-head"><h2>Character</h2><p>ASCII / Unicode character codes</p></div>
+<div class="viz">
+<div class="legend"><span class="lg"><i style="background:rgba(0,212,255,.5);border-color:#00d4ff"></i>bit = 1</span><span class="lg"><i style="background:#1a1d3e;opacity:.5"></i>bit = 0</span><span class="lg"><i style="background:rgba(232,67,147,.45);border-color:#e84393"></i>sign</span><span class="lg"><i style="background:rgba(155,89,182,.45);border-color:#9b59b6"></i>exponent</span><span class="lg"><i style="background:rgba(241,196,15,.45);border-color:#f1c40f"></i>mantissa</span></div>
+<div class="sqwrap" id="ops2"></div>
+<div class="pinfo" id="pinfo2"></div>
+<div class="segrow" id="segrow2"></div>
+<div class="bits" id="bits2"></div>
+<div class="formula" id="ft2"></div>
+<div class="stats" id="stats2"></div>
+<div class="log" id="log2"></div>
+<div class="result" id="res2"></div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="prog2"></div></div>
+<div class="status" id="s2">Press Play or Step to begin</div>
+<div class="controls"><button class="btn b-play" id="play2">&#9654; Play</button><button class="btn b-step" id="step2">Next Step</button><button class="btn b-reset" id="reset2">Reset</button><div class="speed"><label>Speed</label><input type="range" min="150" max="1500" value="550" id="spd2"><span class="val" id="spdv2">0.55s</span></div></div>
+<div class="desc"><b>How:</b> Characters map to integer codes. ASCII stores them in 8 bits: A = 65 = 01000001 and a = 97 = 01100001 — the codes differ by exactly 32, i.e. bit 5 alone switches case. Modern text uses the same idea with Unicode, which simply reserves more bits. <span class="cx">ASCII: 0–127 in 7 bits | Unicode (UTF-8): 1–4 bytes | O(1) compare</span></div>
+</div>
+
+<div class="panel" id="p3">
+<div class="algo-head"><h2>Boolean</h2><p>true / false — one bit of truth</p></div>
+<div class="viz">
+<div class="legend"><span class="lg"><i style="background:rgba(0,212,255,.5);border-color:#00d4ff"></i>bit = 1</span><span class="lg"><i style="background:#1a1d3e;opacity:.5"></i>bit = 0</span><span class="lg"><i style="background:rgba(232,67,147,.45);border-color:#e84393"></i>sign</span><span class="lg"><i style="background:rgba(155,89,182,.45);border-color:#9b59b6"></i>exponent</span><span class="lg"><i style="background:rgba(241,196,15,.45);border-color:#f1c40f"></i>mantissa</span></div>
+<div class="sqwrap" id="ops3"></div>
+<div class="pinfo" id="pinfo3"></div>
+<div class="segrow" id="segrow3"></div>
+<div class="bits" id="bits3"></div>
+<div class="formula" id="ft3"></div>
+<div class="stats" id="stats3"></div>
+<div class="log" id="log3"></div>
+<div class="result" id="res3"></div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="prog3"></div></div>
+<div class="status" id="s3">Press Play or Step to begin</div>
+<div class="controls"><button class="btn b-play" id="play3">&#9654; Play</button><button class="btn b-step" id="step3">Next Step</button><button class="btn b-reset" id="reset3">Reset</button><div class="speed"><label>Speed</label><input type="range" min="150" max="1500" value="550" id="spd3"><span class="val" id="spdv3">0.55s</span></div></div>
+<div class="desc"><b>How:</b> A boolean holds only two states, so one bit is enough (languages usually pad it to one byte for alignment). Every loop condition, permission flag and visited marker in this whole site is built from these single bits, combined with AND, OR and NOT. <span class="cx">bool: true = 1, false = 0 | 1 byte in memory | O(1) logic</span></div>
+</div>
+
+<div class="panel" id="p4">
+<div class="algo-head"><h2>Static Array</h2><p>Fixed-size contiguous block</p></div>
+<div class="viz">
+<div class="legend"><span class="lg"><i style="background:#1a1d3e"></i>occupied</span><span class="lg"><i style="background:#1a1d3e;opacity:.4;border-style:dashed"></i>empty slot</span><span class="lg"><i style="background:rgba(0,212,255,.4);border-color:#00d4ff"></i>current</span><span class="lg"><i style="background:rgba(72,208,176,.45);border-color:#48d0b0"></i>added / front</span><span class="lg"><i style="background:rgba(241,196,15,.4);border-color:#f1c40f"></i>moved</span></div>
+<div class="sqwrap" id="ops4"></div>
+<div class="cells" id="cells4"></div>
+<div class="formula" id="ft4"></div>
+<div class="stats" id="stats4"></div>
+<div class="log" id="log4"></div>
+<div class="result" id="res4"></div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="prog4"></div></div>
+<div class="status" id="s4">Press Play or Step to begin</div>
+<div class="controls"><button class="btn b-play" id="play4">&#9654; Play</button><button class="btn b-step" id="step4">Next Step</button><button class="btn b-reset" id="reset4">Reset</button><div class="speed"><label>Speed</label><input type="range" min="150" max="1500" value="550" id="spd4"><span class="val" id="spdv4">0.55s</span></div></div>
+<div class="desc"><b>How:</b> Allocate N consecutive slots at creation time. Reading a[i] is pure arithmetic: address = base + i × element size, so every element is reached in one step. The trade-off is that the size is baked in — there is no room to grow, which is exactly what the dynamic array fixes. <span class="cx">index O(1) | search O(n) | resize not allowed | memory contiguous</span></div>
+</div>
+
+<div class="panel" id="p5">
+<div class="algo-head"><h2>Dynamic Array</h2><p>Grows by doubling — amortized O(1) push</p></div>
+<div class="viz">
+<div class="legend"><span class="lg"><i style="background:#1a1d3e"></i>occupied</span><span class="lg"><i style="background:#1a1d3e;opacity:.4;border-style:dashed"></i>empty slot</span><span class="lg"><i style="background:rgba(0,212,255,.4);border-color:#00d4ff"></i>current</span><span class="lg"><i style="background:rgba(72,208,176,.45);border-color:#48d0b0"></i>added / front</span><span class="lg"><i style="background:rgba(241,196,15,.4);border-color:#f1c40f"></i>moved</span></div>
+<div class="sqwrap" id="ops5"></div>
+<div class="cells" id="cells5"></div>
+<div class="formula" id="ft5"></div>
+<div class="stats" id="stats5"></div>
+<div class="log" id="log5"></div>
+<div class="result" id="res5"></div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="prog5"></div></div>
+<div class="status" id="s5">Press Play or Step to begin</div>
+<div class="controls"><button class="btn b-play" id="play5">&#9654; Play</button><button class="btn b-step" id="step5">Next Step</button><button class="btn b-reset" id="reset5">Reset</button><div class="speed"><label>Speed</label><input type="range" min="150" max="1500" value="550" id="spd5"><span class="val" id="spdv5">0.55s</span></div></div>
+<div class="desc"><b>How:</b> Push into free slots until the buffer is full, then allocate a block twice as large and copy everything over. The expensive copy happens rarely (every k-th push costs O(k)) so the cost averaged over all pushes stays constant — amortized O(1). <span class="cx">push amortized O(1) | worst O(n) on resize | grow ×2 | memory contiguous</span></div>
+</div>
+
+<div class="panel" id="p6">
+<div class="algo-head"><h2>Singly Linked List</h2><p>head → next → next → NULL</p></div>
+<div class="viz">
+<div class="legend"><span class="lg"><i style="background:#1a1d3e"></i>node</span><span class="lg"><i style="background:rgba(0,212,255,.4);border-color:#00d4ff"></i>current</span><span class="lg"><i style="background:rgba(72,208,176,.45);border-color:#48d0b0"></i>inserted / found</span><span class="lg"><i style="color:#9b59b6">&#8596;</i>prev pointer (doubly)</span><span class="lg"><i style="border-style:dashed"></i>NULL</span></div>
+<div class="sqwrap" id="ops6"></div>
+<div class="list" id="list6"></div>
+<div class="lwrap" id="lwrap6"></div>
+<div class="formula" id="ft6"></div>
+<div class="stats" id="stats6"></div>
+<div class="log" id="log6"></div>
+<div class="result" id="res6"></div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="prog6"></div></div>
+<div class="status" id="s6">Press Play or Step to begin</div>
+<div class="controls"><button class="btn b-play" id="play6">&#9654; Play</button><button class="btn b-step" id="step6">Next Step</button><button class="btn b-reset" id="reset6">Reset</button><div class="speed"><label>Speed</label><input type="range" min="150" max="1500" value="550" id="spd6"><span class="val" id="spdv6">0.55s</span></div></div>
+<div class="desc"><b>How:</b> Each node stores a value and a pointer to the next node, ending in NULL. Pushing at the head just relinks two pointers and never touches the rest of the list, while searching or deleting in the middle costs a walk of O(n). No random access — you always start at head. <span class="cx">insert front O(1) | search / delete O(n) | extra pointer per node</span></div>
+</div>
+
+<div class="panel" id="p7">
+<div class="algo-head"><h2>Doubly Linked List</h2><p>prev ↔ next — both directions</p></div>
+<div class="viz">
+<div class="legend"><span class="lg"><i style="background:#1a1d3e"></i>node</span><span class="lg"><i style="background:rgba(0,212,255,.4);border-color:#00d4ff"></i>current</span><span class="lg"><i style="background:rgba(72,208,176,.45);border-color:#48d0b0"></i>inserted / found</span><span class="lg"><i style="color:#9b59b6">&#8596;</i>prev pointer (doubly)</span><span class="lg"><i style="border-style:dashed"></i>NULL</span></div>
+<div class="sqwrap" id="ops7"></div>
+<div class="list" id="list7"></div>
+<div class="lwrap" id="lwrap7"></div>
+<div class="formula" id="ft7"></div>
+<div class="stats" id="stats7"></div>
+<div class="log" id="log7"></div>
+<div class="result" id="res7"></div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="prog7"></div></div>
+<div class="status" id="s7">Press Play or Step to begin</div>
+<div class="controls"><button class="btn b-play" id="play7">&#9654; Play</button><button class="btn b-step" id="step7">Next Step</button><button class="btn b-reset" id="reset7">Reset</button><div class="speed"><label>Speed</label><input type="range" min="150" max="1500" value="550" id="spd7"><span class="val" id="spdv7">0.55s</span></div></div>
+<div class="desc"><b>How:</b> Adding a prev pointer doubles the pointer overhead but buys bidirectional walking and O(1) deletion once you already hold the node: relink prev.next and next.prev, no walk from the head required. Deques, LRU caches and browser history are built on it. <span class="cx">delete known node O(1) | 2 pointers per node | traversal both ways</span></div>
+</div>
+
+<div class="panel" id="p8">
+<div class="algo-head"><h2>Circular Linked List</h2><p>The tail points back to the head</p></div>
+<div class="viz">
+<div class="legend"><span class="lg"><i style="background:#1a1d3e"></i>node</span><span class="lg"><i style="background:rgba(0,212,255,.4);border-color:#00d4ff"></i>current</span><span class="lg"><i style="background:rgba(72,208,176,.45);border-color:#48d0b0"></i>inserted / found</span><span class="lg"><i style="color:#9b59b6">&#8596;</i>prev pointer (doubly)</span><span class="lg"><i style="border-style:dashed"></i>NULL</span></div>
+<div class="sqwrap" id="ops8"></div>
+<div class="list" id="list8"></div>
+<div class="lwrap" id="lwrap8"></div>
+<div class="formula" id="ft8"></div>
+<div class="stats" id="stats8"></div>
+<div class="log" id="log8"></div>
+<div class="result" id="res8"></div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="prog8"></div></div>
+<div class="status" id="s8">Press Play or Step to begin</div>
+<div class="controls"><button class="btn b-play" id="play8">&#9654; Play</button><button class="btn b-step" id="step8">Next Step</button><button class="btn b-reset" id="reset8">Reset</button><div class="speed"><label>Speed</label><input type="range" min="150" max="1500" value="550" id="spd8"><span class="val" id="spdv8">0.55s</span></div></div>
+<div class="desc"><b>How:</b> Close the chain by making the tail.next point at the head, so there is no end of the list at all. Traversal simply keeps going until you arrive back where you started — perfect for round-robin scheduling and playlists that repeat forever. <span class="cx">no NULL tail | traverse until head again | O(1) append at tail</span></div>
+</div>
+
+<div class="panel" id="p9">
+<div class="algo-head"><h2>Stack (LIFO)</h2><p>Last In, First Out</p></div>
+<div class="viz">
+<div class="legend"><span class="lg"><i style="background:#1a1d3e"></i>occupied</span><span class="lg"><i style="background:#1a1d3e;opacity:.4;border-style:dashed"></i>empty slot</span><span class="lg"><i style="background:rgba(0,212,255,.4);border-color:#00d4ff"></i>current</span><span class="lg"><i style="background:rgba(72,208,176,.45);border-color:#48d0b0"></i>added / front</span><span class="lg"><i style="background:rgba(241,196,15,.4);border-color:#f1c40f"></i>moved</span></div>
+<div class="sqwrap" id="ops9"></div>
+<div class="cells" id="cells9"></div>
+<div class="formula" id="ft9"></div>
+<div class="stats" id="stats9"></div>
+<div class="log" id="log9"></div>
+<div class="result" id="res9"></div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="prog9"></div></div>
+<div class="status" id="s9">Press Play or Step to begin</div>
+<div class="controls"><button class="btn b-play" id="play9">&#9654; Play</button><button class="btn b-step" id="step9">Next Step</button><button class="btn b-reset" id="reset9">Reset</button><div class="speed"><label>Speed</label><input type="range" min="150" max="1500" value="550" id="spd9"><span class="val" id="spdv9">0.55s</span></div></div>
+<div class="desc"><b>How:</b> The stack exposes exactly one end: push puts a value on top, pop takes the newest value off, peek reads it without removing. Both run in constant time because nothing below the top is ever touched — that is what makes it last in, first out. <span class="cx">push / pop / peek O(1) | LIFO | memory: O(n)</span></div>
+</div>
+
+<div class="panel" id="p10">
+<div class="algo-head"><h2>Queue (FIFO)</h2><p>First In, First Out</p></div>
+<div class="viz">
+<div class="legend"><span class="lg"><i style="background:#1a1d3e"></i>occupied</span><span class="lg"><i style="background:#1a1d3e;opacity:.4;border-style:dashed"></i>empty slot</span><span class="lg"><i style="background:rgba(0,212,255,.4);border-color:#00d4ff"></i>current</span><span class="lg"><i style="background:rgba(72,208,176,.45);border-color:#48d0b0"></i>added / front</span><span class="lg"><i style="background:rgba(241,196,15,.4);border-color:#f1c40f"></i>moved</span></div>
+<div class="sqwrap" id="ops10"></div>
+<div class="cells" id="cells10"></div>
+<div class="formula" id="ft10"></div>
+<div class="stats" id="stats10"></div>
+<div class="log" id="log10"></div>
+<div class="result" id="res10"></div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="prog10"></div></div>
+<div class="status" id="s10">Press Play or Step to begin</div>
+<div class="controls"><button class="btn b-play" id="play10">&#9654; Play</button><button class="btn b-step" id="step10">Next Step</button><button class="btn b-reset" id="reset10">Reset</button><div class="speed"><label>Speed</label><input type="range" min="150" max="1500" value="550" id="spd10"><span class="val" id="spdv10">0.55s</span></div></div>
+<div class="desc"><b>How:</b> The queue offers two opposite ends: enqueue adds at the rear, dequeue removes from the front, so the earliest arrival leaves first. Implemented with head and tail pointers over an array, both operations are O(1) — no element is ever shifted. <span class="cx">enqueue / dequeue O(1) | FIFO | memory: O(n)</span></div>
+</div>
+
+<div class="panel" id="p11">
+<div class="algo-head"><h2>Circular Queue</h2><p>Ring buffer — the array wraps around</p></div>
+<div class="viz">
+<div class="legend"><span class="lg"><i style="background:#1a1d3e"></i>occupied</span><span class="lg"><i style="background:#1a1d3e;opacity:.4;border-style:dashed"></i>empty slot</span><span class="lg"><i style="background:rgba(0,212,255,.4);border-color:#00d4ff"></i>current</span><span class="lg"><i style="background:rgba(72,208,176,.45);border-color:#48d0b0"></i>added / front</span><span class="lg"><i style="background:rgba(241,196,15,.4);border-color:#f1c40f"></i>moved</span></div>
+<div class="sqwrap" id="ops11"></div>
+<div class="cells" id="cells11"></div>
+<div class="formula" id="ft11"></div>
+<div class="stats" id="stats11"></div>
+<div class="log" id="log11"></div>
+<div class="result" id="res11"></div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="prog11"></div></div>
+<div class="status" id="s11">Press Play or Step to begin</div>
+<div class="controls"><button class="btn b-play" id="play11">&#9654; Play</button><button class="btn b-step" id="step11">Next Step</button><button class="btn b-reset" id="reset11">Reset</button><div class="speed"><label>Speed</label><input type="range" min="150" max="1500" value="550" id="spd11"><span class="val" id="spdv11">0.55s</span></div></div>
+<div class="desc"><b>How:</b> With an ordinary array the front slots are lost forever once dequeued. In a ring buffer the rear index wraps from the last slot back to zero, reusing freed space and keeping every one of the capacity slots usable — the classic block-buffer technique in operating systems and audio. <span class="cx">O(1) both ends | fixed capacity | no wasted slots | wraps rear → 0</span></div>
+</div>
+
+<div class="panel" id="p12">
+<div class="algo-head"><h2>Deque</h2><p>Double-ended queue — both ends open</p></div>
+<div class="viz">
+<div class="legend"><span class="lg"><i style="background:#1a1d3e"></i>occupied</span><span class="lg"><i style="background:#1a1d3e;opacity:.4;border-style:dashed"></i>empty slot</span><span class="lg"><i style="background:rgba(0,212,255,.4);border-color:#00d4ff"></i>current</span><span class="lg"><i style="background:rgba(72,208,176,.45);border-color:#48d0b0"></i>added / front</span><span class="lg"><i style="background:rgba(241,196,15,.4);border-color:#f1c40f"></i>moved</span></div>
+<div class="sqwrap" id="ops12"></div>
+<div class="cells" id="cells12"></div>
+<div class="formula" id="ft12"></div>
+<div class="stats" id="stats12"></div>
+<div class="log" id="log12"></div>
+<div class="result" id="res12"></div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="prog12"></div></div>
+<div class="status" id="s12">Press Play or Step to begin</div>
+<div class="controls"><button class="btn b-play" id="play12">&#9654; Play</button><button class="btn b-step" id="step12">Next Step</button><button class="btn b-reset" id="reset12">Reset</button><div class="speed"><label>Speed</label><input type="range" min="150" max="1500" value="550" id="spd12"><span class="val" id="spdv12">0.55s</span></div></div>
+<div class="desc"><b>How:</b> The deque merges the two previous structures: push/pop front and push/pop back are all constant time with head and tail pointers. Sliding-window maximum, work stealing and undo buffers all lean on this one interface. <span class="cx">4 operations, all O(1) | FIFO or LIFO views | array or list based</span></div>
+</div>
+
+<div class="panel" id="p13">
+<div class="algo-head"><h2>Priority Queue</h2><p>Always serve the highest priority first</p></div>
+<div class="viz">
+<div class="legend"><span class="lg"><i style="background:#1a1d3e"></i>occupied</span><span class="lg"><i style="background:#1a1d3e;opacity:.4;border-style:dashed"></i>empty slot</span><span class="lg"><i style="background:rgba(0,212,255,.4);border-color:#00d4ff"></i>current</span><span class="lg"><i style="background:rgba(72,208,176,.45);border-color:#48d0b0"></i>added / front</span><span class="lg"><i style="background:rgba(241,196,15,.4);border-color:#f1c40f"></i>moved</span></div>
+<div class="sqwrap" id="ops13"></div>
+<div class="cells" id="cells13"></div>
+<div class="formula" id="ft13"></div>
+<div class="stats" id="stats13"></div>
+<div class="log" id="log13"></div>
+<div class="result" id="res13"></div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="prog13"></div></div>
+<div class="status" id="s13">Press Play or Step to begin</div>
+<div class="controls"><button class="btn b-play" id="play13">&#9654; Play</button><button class="btn b-step" id="step13">Next Step</button><button class="btn b-reset" id="reset13">Reset</button><div class="speed"><label>Speed</label><input type="range" min="150" max="1500" value="550" id="spd13"><span class="val" id="spdv13">0.55s</span></div></div>
+<div class="desc"><b>How:</b> Unlike a queue, the next element out is the one with the highest priority, not the oldest. Backing it with a binary heap keeps enqueue and dequeue at O(log n) while the largest item always sits at index 0, ready in O(1) time by peek. <span class="cx">enqueue / dequeue O(log n) | peek O(1) | implemented as heap</span></div>
+</div>
+
+<div class="panel" id="p14">
+<div class="algo-head"><h2>Binary Tree</h2><p>Every node has at most two children</p></div>
+<div class="viz">
+<div class="legend"><span class="lg"><i style="background:#1a1d3e"></i>node</span><span class="lg"><i style="background:rgba(0,212,255,.4);border-color:#00d4ff"></i>on path</span><span class="lg"><i style="background:rgba(241,196,15,.4);border-color:#f1c40f"></i>current</span><span class="lg"><i style="background:rgba(72,208,176,.45);border-color:#48d0b0"></i>inserted / rebalanced</span><span class="lg"><i style="background:rgba(255,107,107,.4);border-color:#ff6b6b"></i>violation</span></div>
+<div class="sqwrap" id="ops14"></div>
+<div class="tree" id="tree14"></div>
+
+<div class="formula" id="ft14"></div>
+<div class="stats" id="stats14"></div>
+<div class="log" id="log14"></div>
+<div class="result" id="res14"></div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="prog14"></div></div>
+<div class="status" id="s14">Press Play or Step to begin</div>
+<div class="controls"><button class="btn b-play" id="play14">&#9654; Play</button><button class="btn b-step" id="step14">Next Step</button><button class="btn b-reset" id="reset14">Reset</button><div class="speed"><label>Speed</label><input type="range" min="150" max="1500" value="550" id="spd14"><span class="val" id="spdv14">0.55s</span></div></div>
+<div class="desc"><b>How:</b> A tree where each node carries at most two child pointers. Recursion gives the classic traversals: visit-left-right (pre), left-visit-right (in — sorted order for BSTs), left-right-visit (post), and breadth-first level order with a queue. All four visit every node exactly once. <span class="cx">traversal O(n) | height h → O(h) per root path | 4 classic orders</span></div>
+</div>
+
+<div class="panel" id="p15">
+<div class="algo-head"><h2>Binary Search Tree</h2><p>Left &lt; node &lt; right — sorted structure</p></div>
+<div class="viz">
+<div class="legend"><span class="lg"><i style="background:#1a1d3e"></i>node</span><span class="lg"><i style="background:rgba(0,212,255,.4);border-color:#00d4ff"></i>on path</span><span class="lg"><i style="background:rgba(241,196,15,.4);border-color:#f1c40f"></i>current</span><span class="lg"><i style="background:rgba(72,208,176,.45);border-color:#48d0b0"></i>inserted / rebalanced</span><span class="lg"><i style="background:rgba(255,107,107,.4);border-color:#ff6b6b"></i>violation</span></div>
+<div class="sqwrap" id="ops15"></div>
+<div class="tree" id="tree15"></div>
+
+<div class="formula" id="ft15"></div>
+<div class="stats" id="stats15"></div>
+<div class="log" id="log15"></div>
+<div class="result" id="res15"></div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="prog15"></div></div>
+<div class="status" id="s15">Press Play or Step to begin</div>
+<div class="controls"><button class="btn b-play" id="play15">&#9654; Play</button><button class="btn b-step" id="step15">Next Step</button><button class="btn b-reset" id="reset15">Reset</button><div class="speed"><label>Speed</label><input type="range" min="150" max="1500" value="550" id="spd15"><span class="val" id="spdv15">0.55s</span></div></div>
+<div class="desc"><b>How:</b> Keep every left subtree strictly smaller and every right subtree larger. Searching then discards half the tree at every step and an in-order walk emits the keys in sorted order. It degrades to O(n) only if inserts arrive already sorted — which balancing trees prevent. <span class="cx">search / insert / delete O(h) | O(log n) when balanced | sorted in-order</span></div>
+</div>
+
+<div class="panel" id="p16">
+<div class="algo-head"><h2>AVL Tree</h2><p>Self-balancing: |balance factor| ≤ 1 everywhere</p></div>
+<div class="viz">
+<div class="legend"><span class="lg"><i style="background:#1a1d3e"></i>node</span><span class="lg"><i style="background:rgba(0,212,255,.4);border-color:#00d4ff"></i>on path</span><span class="lg"><i style="background:rgba(241,196,15,.4);border-color:#f1c40f"></i>current</span><span class="lg"><i style="background:rgba(72,208,176,.45);border-color:#48d0b0"></i>inserted / rebalanced</span><span class="lg"><i style="background:rgba(255,107,107,.4);border-color:#ff6b6b"></i>violation</span></div>
+<div class="sqwrap" id="ops16"></div>
+<div class="tree" id="tree16"></div>
+
+<div class="formula" id="ft16"></div>
+<div class="stats" id="stats16"></div>
+<div class="log" id="log16"></div>
+<div class="result" id="res16"></div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="prog16"></div></div>
+<div class="status" id="s16">Press Play or Step to begin</div>
+<div class="controls"><button class="btn b-play" id="play16">&#9654; Play</button><button class="btn b-step" id="step16">Next Step</button><button class="btn b-reset" id="reset16">Reset</button><div class="speed"><label>Speed</label><input type="range" min="150" max="1500" value="550" id="spd16"><span class="val" id="spdv16">0.55s</span></div></div>
+<div class="desc"><b>How:</b> Each node stores a balance factor (left height − right height). The moment a node reaches ±2 the tree performs one of four rotations — here the LL case right-rotates at 30 — and heights settle again, guaranteeing O(log n) search forever. <span class="cx">O(log n) guaranteed | insert/delete + rotations O(log n) | strictly balanced</span></div>
+</div>
+
+<div class="panel" id="p17">
+<div class="algo-head"><h2>Red-Black Tree</h2><p>Color-coded balance: no two reds in a row</p></div>
+<div class="viz">
+<div class="legend"><span class="lg"><i style="background:#1a1d3e"></i>node</span><span class="lg"><i style="background:rgba(0,212,255,.4);border-color:#00d4ff"></i>on path</span><span class="lg"><i style="background:rgba(241,196,15,.4);border-color:#f1c40f"></i>current</span><span class="lg"><i style="background:rgba(72,208,176,.45);border-color:#48d0b0"></i>inserted / rebalanced</span><span class="lg"><i style="background:rgba(255,107,107,.4);border-color:#ff6b6b"></i>violation</span></div>
+<div class="sqwrap" id="ops17"></div>
+<div class="tree" id="tree17"></div>
+
+<div class="formula" id="ft17"></div>
+<div class="stats" id="stats17"></div>
+<div class="log" id="log17"></div>
+<div class="result" id="res17"></div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="prog17"></div></div>
+<div class="status" id="s17">Press Play or Step to begin</div>
+<div class="controls"><button class="btn b-play" id="play17">&#9654; Play</button><button class="btn b-step" id="step17">Next Step</button><button class="btn b-reset" id="reset17">Reset</button><div class="speed"><label>Speed</label><input type="range" min="150" max="1500" value="550" id="spd17"><span class="val" id="spdv17">0.55s</span></div></div>
+<div class="desc"><b>How:</b> Colour every node red or black and enforce four rules: root black, no red-red parent/child, equal black counts on every path, leaves black. Insert fixes violations with at most one recolour plus one rotation — cheaper to maintain than AVL, at the price of a slightly looser height bound. <span class="cx">O(log n) | ≤ 2 rotations per insert | used by std::map, TreeMap</span></div>
+</div>
+
+<div class="panel" id="p18">
+<div class="algo-head"><h2>B-Tree / B+ Tree</h2><p>Order-3 multi-way tree for disks</p></div>
+<div class="viz">
+<div class="legend"><span class="lg"><i style="background:#1a1d3e"></i>node</span><span class="lg"><i style="background:rgba(0,212,255,.4);border-color:#00d4ff"></i>active node</span><span class="lg"><i style="background:rgba(255,107,107,.4);border-color:#ff6b6b"></i>overflow (3 keys)</span><span class="lg"><i style="background:rgba(241,196,15,.4);border-color:#f1c40f"></i>median promoted</span><span class="lg"><i style="background:rgba(72,208,176,.45);border-color:#48d0b0"></i>new node</span></div>
+<div class="sqwrap" id="ops18"></div>
+<div class="btree" id="btree18"></div>
+<div class="formula" id="ft18"></div>
+<div class="stats" id="stats18"></div>
+<div class="log" id="log18"></div>
+<div class="result" id="res18"></div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="prog18"></div></div>
+<div class="status" id="s18">Press Play or Step to begin</div>
+<div class="controls"><button class="btn b-play" id="play18">&#9654; Play</button><button class="btn b-step" id="step18">Next Step</button><button class="btn b-reset" id="reset18">Reset</button><div class="speed"><label>Speed</label><input type="range" min="150" max="1500" value="550" id="spd18"><span class="val" id="spdv18">0.55s</span></div></div>
+<div class="desc"><b>How:</b> Instead of one key per node, a B-tree node of order 3 holds up to two keys and three children, and splits whenever it overflows: the median key is promoted to the parent. All leaves stay at the same depth, and B+ trees chain the leaves for fast range scans — that is why databases store their indexes this way. <span class="cx">order 3: max 2 keys / node | split pushes median up | O(log n)</span></div>
+</div>
+
+<div class="panel" id="p19">
+<div class="algo-head"><h2>Binary Heap</h2><p>Complete tree where parent ≤ children (min-heap)</p></div>
+<div class="viz">
+<div class="legend"><span class="lg"><i style="background:#1a1d3e"></i>node</span><span class="lg"><i style="background:rgba(0,212,255,.4);border-color:#00d4ff"></i>on path</span><span class="lg"><i style="background:rgba(241,196,15,.4);border-color:#f1c40f"></i>current</span><span class="lg"><i style="background:rgba(72,208,176,.45);border-color:#48d0b0"></i>inserted / rebalanced</span><span class="lg"><i style="background:rgba(255,107,107,.4);border-color:#ff6b6b"></i>violation</span></div>
+<div class="sqwrap" id="ops19"></div>
+<div class="tree" id="tree19"></div>
+<div class="cells" id="cells19"></div>
+<div class="formula" id="ft19"></div>
+<div class="stats" id="stats19"></div>
+<div class="log" id="log19"></div>
+<div class="result" id="res19"></div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="prog19"></div></div>
+<div class="status" id="s19">Press Play or Step to begin</div>
+<div class="controls"><button class="btn b-play" id="play19">&#9654; Play</button><button class="btn b-step" id="step19">Next Step</button><button class="btn b-reset" id="reset19">Reset</button><div class="speed"><label>Speed</label><input type="range" min="150" max="1500" value="550" id="spd19"><span class="val" id="spdv19">0.55s</span></div></div>
+<div class="desc"><b>How:</b> Shape it as a complete binary tree so the array indices line up with parent/child arithmetic (children of i live at 2i+1 and 2i+2). Inserting drops the new value at the end and sifts it up; extracting the minimum swaps the last value to the root and sifts it down — both O(log n). <span class="cx">insert / extract-min O(log n) | peek O(1) | array-backed, no pointers</span></div>
+</div>
+
+<div class="panel" id="p20">
+<div class="algo-head"><h2>Trie (Prefix Tree)</h2><p>Edges hold characters, not nodes</p></div>
+<div class="viz">
+<div class="legend"><span class="lg"><i style="background:rgba(155,89,182,.4);border-color:#9b59b6"></i>root</span><span class="lg"><i style="background:#1a1d3e"></i>node (label = incoming char)</span><span class="lg"><i style="background:rgba(72,208,176,.4);border-color:#48d0b0"></i>word ends here</span><span class="lg"><i style="background:rgba(0,212,255,.4);border-color:#00d4ff"></i>on search path</span><span class="lg"><i style="background:rgba(255,107,107,.4);border-color:#ff6b6b"></i>missing edge</span></div>
+<div class="sqwrap" id="ops20"></div>
+<div class="trie" id="trie20"></div>
+<div class="formula" id="ft20"></div>
+<div class="stats" id="stats20"></div>
+<div class="log" id="log20"></div>
+<div class="result" id="res20"></div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="prog20"></div></div>
+<div class="status" id="s20">Press Play or Step to begin</div>
+<div class="controls"><button class="btn b-play" id="play20">&#9654; Play</button><button class="btn b-step" id="step20">Next Step</button><button class="btn b-reset" id="reset20">Reset</button><div class="speed"><label>Speed</label><input type="range" min="150" max="1500" value="550" id="spd20"><span class="val" id="spdv20">0.55s</span></div></div>
+<div class="desc"><b>How:</b> Store each character of a word on the edge into its node, so words with a common prefix share the same path. Searching for car walks c → a → r, exactly as many steps as the word has letters — O(L) regardless of how many words are stored — and a star marks where a complete word ends. <span class="cx">search O(L) | space-efficient prefixes | autocomplete favourite</span></div>
+</div>
+
+<div class="panel" id="p21">
+<div class="algo-head"><h2>Directed Graph (Digraph)</h2><p>Edges have a direction — one-way streets</p></div>
+<div class="viz">
+<div class="legend"><span class="lg"><i style="background:rgba(0,212,255,.4);border-color:#00d4ff"></i>current</span><span class="lg"><i style="background:rgba(72,208,176,.4);border-color:#48d0b0"></i>visited / settled</span><span class="lg"><i style="background:rgba(155,89,182,.4);border-color:#9b59b6"></i>in queue / frontier</span><span class="lg"><i style="background:rgba(241,196,15,.4);border-color:#f1c40f"></i>edge weight</span></div>
+<div class="sqwrap" id="ops21"></div>
+<div class="gnodes" id="gnodes21"></div>
+<div class="alist" id="alist21"></div>
+<div class="formula" id="gq21"></div>
+<div class="sqwrap" id="gord21"></div>
+<div class="formula" id="ft21"></div>
+<div class="stats" id="stats21"></div>
+<div class="log" id="log21"></div>
+<div class="result" id="res21"></div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="prog21"></div></div>
+<div class="status" id="s21">Press Play or Step to begin</div>
+<div class="controls"><button class="btn b-play" id="play21">&#9654; Play</button><button class="btn b-step" id="step21">Next Step</button><button class="btn b-reset" id="reset21">Reset</button><div class="speed"><label>Speed</label><input type="range" min="150" max="1500" value="550" id="spd21"><span class="val" id="spdv21">0.55s</span></div></div>
+<div class="desc"><b>How:</b> Each edge points from one vertex to another, so A → B does not imply B → A. The adjacency list records every outgoing edge per vertex, the out-degree of A is simply its list length, and a breadth-first walk visits A, its neighbours, then their neighbours. <span class="cx">E directed edges | adjacency list O(V+E) | Σ out-deg = E</span></div>
+</div>
+
+<div class="panel" id="p22">
+<div class="algo-head"><h2>Undirected Graph</h2><p>Edges run both ways — Σ degrees = 2E</p></div>
+<div class="viz">
+<div class="legend"><span class="lg"><i style="background:rgba(0,212,255,.4);border-color:#00d4ff"></i>current</span><span class="lg"><i style="background:rgba(72,208,176,.4);border-color:#48d0b0"></i>visited / settled</span><span class="lg"><i style="background:rgba(155,89,182,.4);border-color:#9b59b6"></i>in queue / frontier</span><span class="lg"><i style="background:rgba(241,196,15,.4);border-color:#f1c40f"></i>edge weight</span></div>
+<div class="sqwrap" id="ops22"></div>
+<div class="gnodes" id="gnodes22"></div>
+<div class="alist" id="alist22"></div>
+<div class="formula" id="gq22"></div>
+<div class="sqwrap" id="gord22"></div>
+<div class="formula" id="ft22"></div>
+<div class="stats" id="stats22"></div>
+<div class="log" id="log22"></div>
+<div class="result" id="res22"></div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="prog22"></div></div>
+<div class="status" id="s22">Press Play or Step to begin</div>
+<div class="controls"><button class="btn b-play" id="play22">&#9654; Play</button><button class="btn b-step" id="step22">Next Step</button><button class="btn b-reset" id="reset22">Reset</button><div class="speed"><label>Speed</label><input type="range" min="150" max="1500" value="550" id="spd22"><span class="val" id="spdv22">0.55s</span></div></div>
+<div class="desc"><b>How:</b> An undirected edge links its endpoints both ways, so the adjacency list stores each edge twice. Counting degrees then gives a handy identity: the sum of all degrees is exactly 2E, because every edge adds one to two different vertices. <span class="cx">Σ degree = 2E | E = 5 here (Σdeg = 10) | DFS / BFS both work</span></div>
+</div>
+
+<div class="panel" id="p23">
+<div class="algo-head"><h2>Weighted Graph + Dijkstra</h2><p>Edges carry a cost — find the cheapest path</p></div>
+<div class="viz">
+<div class="legend"><span class="lg"><i style="background:rgba(0,212,255,.4);border-color:#00d4ff"></i>current</span><span class="lg"><i style="background:rgba(72,208,176,.4);border-color:#48d0b0"></i>visited / settled</span><span class="lg"><i style="background:rgba(155,89,182,.4);border-color:#9b59b6"></i>in queue / frontier</span><span class="lg"><i style="background:rgba(241,196,15,.4);border-color:#f1c40f"></i>edge weight</span></div>
+<div class="sqwrap" id="ops23"></div>
+<div class="gnodes" id="gnodes23"></div>
+<div class="alist" id="alist23"></div>
+<div class="formula" id="gq23"></div>
+<div class="sqwrap" id="gord23"></div>
+<div class="formula" id="ft23"></div>
+<div class="stats" id="stats23"></div>
+<div class="log" id="log23"></div>
+<div class="result" id="res23"></div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="prog23"></div></div>
+<div class="status" id="s23">Press Play or Step to begin</div>
+<div class="controls"><button class="btn b-play" id="play23">&#9654; Play</button><button class="btn b-step" id="step23">Next Step</button><button class="btn b-reset" id="reset23">Reset</button><div class="speed"><label>Speed</label><input type="range" min="150" max="1500" value="550" id="spd23"><span class="val" id="spdv23">0.55s</span></div></div>
+<div class="desc"><b>How:</b> When edges have weights the goal becomes the cheapest route, not the fewest hops. Dijkstra keeps a distance for every vertex, repeatedly settles the unvisited vertex with the smallest tentative distance, and relaxes its edges — once a vertex is settled its distance can never improve. <span class="cx">Dijkstra O((V+E) log V) | greedy, never revisits settled | weights ≥ 0</span></div>
+</div>
+
+<div class="panel" id="p24">
+<div class="algo-head"><h2>Hash Table</h2><p>hash(key) mod 7 with chaining</p></div>
+<div class="viz">
+<div class="legend"><span class="lg"><i style="background:#1a1d3e"></i>bucket slot</span><span class="lg"><i style="background:rgba(0,212,255,.4);border-color:#00d4ff"></i>hash target now</span><span class="lg"><i style="background:rgba(241,196,15,.4);border-color:#f1c40f"></i>collision chained</span><span class="lg"><i style="background:rgba(72,208,176,.4);border-color:#48d0b0"></i>found / stored</span><span class="lg"><i style="background:rgba(255,107,107,.4);border-color:#ff6b6b"></i>removed / missing</span></div>
+<div class="sqwrap" id="ops24"></div>
+<div class="buckets" id="buckets24"></div>
+<div class="formula" id="ft24"></div>
+<div class="stats" id="stats24"></div>
+<div class="log" id="log24"></div>
+<div class="result" id="res24"></div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="prog24"></div></div>
+<div class="status" id="s24">Press Play or Step to begin</div>
+<div class="controls"><button class="btn b-play" id="play24">&#9654; Play</button><button class="btn b-step" id="step24">Next Step</button><button class="btn b-reset" id="reset24">Reset</button><div class="speed"><label>Speed</label><input type="range" min="150" max="1500" value="550" id="spd24"><span class="val" id="spdv24">0.55s</span></div></div>
+<div class="desc"><b>How:</b> A hash function maps each key straight to a bucket index — here key mod 7 — so lookup skips all searching and jumps to one slot. When two keys hash to the same bucket (31 and 10 both give 3) they simply chain together in that slot. The load factor α = entries/buckets tells how crowded the table is. <span class="cx">lookup avg O(1) | worst O(n) | α = 6/7 ≈ 0.86 | chaining collisions</span></div>
+</div>
+
+<div class="panel" id="p25">
+<div class="algo-head"><h2>Hash Map</h2><p>key → value pairs, hashed by first letter</p></div>
+<div class="viz">
+<div class="legend"><span class="lg"><i style="background:#1a1d3e"></i>bucket slot</span><span class="lg"><i style="background:rgba(0,212,255,.4);border-color:#00d4ff"></i>hash target now</span><span class="lg"><i style="background:rgba(241,196,15,.4);border-color:#f1c40f"></i>collision chained</span><span class="lg"><i style="background:rgba(72,208,176,.4);border-color:#48d0b0"></i>found / stored</span><span class="lg"><i style="background:rgba(255,107,107,.4);border-color:#ff6b6b"></i>removed / missing</span></div>
+<div class="sqwrap" id="ops25"></div>
+<div class="buckets" id="buckets25"></div>
+<div class="formula" id="ft25"></div>
+<div class="stats" id="stats25"></div>
+<div class="log" id="log25"></div>
+<div class="result" id="res25"></div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="prog25"></div></div>
+<div class="status" id="s25">Press Play or Step to begin</div>
+<div class="controls"><button class="btn b-play" id="play25">&#9654; Play</button><button class="btn b-step" id="step25">Next Step</button><button class="btn b-reset" id="reset25">Reset</button><div class="speed"><label>Speed</label><input type="range" min="150" max="1500" value="550" id="spd25"><span class="val" id="spdv25">0.55s</span></div></div>
+<div class="desc"><b>How:</b> A hash map stores key → value pairs and hashes the key to find the bucket holding them. Here the first letter of the word (a, c, d, e, o) chooses the slot via mod 5, so owl and emu share bucket 1 — each keeps its own value in the chain, and get still costs O(1) on average. <span class="cx">put / get avg O(1) | 5 buckets | owl and emu chain in bucket 1</span></div>
+</div>
+
+<div class="panel" id="p26">
+<div class="algo-head"><h2>Hash Set</h2><p>Unique members only — membership in O(1)</p></div>
+<div class="viz">
+<div class="legend"><span class="lg"><i style="background:#1a1d3e"></i>bucket slot</span><span class="lg"><i style="background:rgba(0,212,255,.4);border-color:#00d4ff"></i>hash target now</span><span class="lg"><i style="background:rgba(241,196,15,.4);border-color:#f1c40f"></i>collision chained</span><span class="lg"><i style="background:rgba(72,208,176,.4);border-color:#48d0b0"></i>found / stored</span><span class="lg"><i style="background:rgba(255,107,107,.4);border-color:#ff6b6b"></i>removed / missing</span></div>
+<div class="sqwrap" id="ops26"></div>
+<div class="buckets" id="buckets26"></div>
+<div class="formula" id="ft26"></div>
+<div class="stats" id="stats26"></div>
+<div class="log" id="log26"></div>
+<div class="result" id="res26"></div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="prog26"></div></div>
+<div class="status" id="s26">Press Play or Step to begin</div>
+<div class="controls"><button class="btn b-play" id="play26">&#9654; Play</button><button class="btn b-step" id="step26">Next Step</button><button class="btn b-reset" id="reset26">Reset</button><div class="speed"><label>Speed</label><input type="range" min="150" max="1500" value="550" id="spd26"><span class="val" id="spdv26">0.55s</span></div></div>
+<div class="desc"><b>How:</b> A hash set stores only keys with no duplicates allowed — hashing already tells you whether the value is present, so no separate search is needed. The members 12 and 7 collide into bucket 2 and chain together; removing 12 leaves 7 untouched in the same chain. <span class="cx">add / contains / remove avg O(1) | no duplicates | mod 5 buckets</span></div>
+</div>
+
+</div>
+<div class="confetti" id="confetti"></div>
+</div></div>
+<script src="data-structures-algorithms.js"></script>
+<script src="theme.js"></script>
+<script src="enhance.js" defer></script></body>
+</html>

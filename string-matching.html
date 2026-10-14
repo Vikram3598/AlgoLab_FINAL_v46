@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>String Matching | AlgoLab</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#060912;--card:#0a0a2e;--border:#1f2833;--accent:#00d4ff;--green:#48d0b0;--red:#ff6b6b;--gold:#f1c40f;--orange:#ff9f43;--purple:#9b59b6;--pink:#e84393;--text:#e0e0e0;--dim:#667080}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;overflow-x:hidden}
+.bg{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;overflow:hidden}
+.bg .orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.12;animation:of 22s ease-in-out infinite}
+.bg .orb:nth-child(1){width:400px;height:400px;background:var(--purple);top:-100px;left:-100px}
+.bg .orb:nth-child(2){width:350px;height:350px;background:var(--pink);bottom:-100px;right:-100px;animation-delay:-8s}
+.bg .orb:nth-child(3){width:300px;height:300px;background:var(--accent);top:40%;left:55%;animation-delay:-15s}
+@keyframes of{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(70px,-50px) scale(1.15)}66%{transform:translate(-50px,70px) scale(.85)}}
+.header{position:relative;z-index:10;background:rgba(10,10,46,.92);backdrop-filter:blur(10px);padding:14px 25px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.logo{font-size:1.3rem;font-weight:800;background:linear-gradient(135deg,var(--purple),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sub{color:var(--dim);font-size:.75rem}
+.back-btn{padding:7px 16px;background:rgba(155,89,182,.1);border:1px solid var(--purple);border-radius:6px;color:var(--purple);font-size:.8rem;cursor:pointer;transition:all .2s;display:none}
+.back-btn:hover{background:rgba(155,89,182,.2);transform:translateX(-3px)}
+.back-btn.show{display:block}
+.home{position:relative;z-index:1;max-width:980px;margin:0 auto;padding:50px 20px;text-align:center}
+.home h1{font-size:2.2rem;margin-bottom:8px;background:linear-gradient(135deg,var(--purple),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.home > .tag{color:var(--dim);font-size:.95rem;margin-bottom:40px;background:none;border:none;padding:0;display:block}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:18px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:26px;cursor:pointer;transition:all .3s;position:relative;overflow:hidden;text-align:left}
+.card::before{content:'';position:absolute;top:0;left:0;width:100%;height:3px;background:linear-gradient(90deg,var(--purple),var(--pink));transform:scaleX(0);transition:transform .3s;transform-origin:left}
+.card:hover{transform:translateY(-6px);border-color:var(--purple);box-shadow:0 12px 40px rgba(155,89,182,.18)}
+.card:hover::before{transform:scaleX(1)}
+.card .ico{font-size:2.4rem;margin-bottom:12px}
+.card h3{color:var(--purple);font-size:1.08rem;margin-bottom:8px}
+.card p{color:var(--dim);font-size:.8rem;line-height:1.6;margin-bottom:12px}
+.tags{display:flex;gap:8px;flex-wrap:wrap}
+.tag{font-size:.65rem;padding:4px 10px;background:rgba(155,89,182,.1);border:1px solid rgba(155,89,182,.25);border-radius:12px;color:var(--purple)}
+.tag.a{background:rgba(0,212,255,.1);border-color:rgba(0,212,255,.2);color:var(--accent)}
+.tag.r{background:rgba(255,107,107,.1);border-color:rgba(255,107,107,.2);color:var(--red)}
+.tag.g{background:rgba(72,208,176,.1);border-color:rgba(72,208,176,.2);color:var(--green)}
+.algo{position:relative;z-index:1;max-width:1150px;margin:0 auto;padding:20px}
+.panel{display:none}
+.panel.on{display:block}
+.algo-head{text-align:center;margin-bottom:18px}
+.algo-head h2{color:var(--purple);font-size:1.4rem;margin-bottom:4px}
+.algo-head p{color:var(--dim);font-size:.85rem}
+.viz{background:rgba(10,10,46,.7);border:1px solid var(--border);border-radius:16px;padding:22px;min-height:300px;margin-bottom:14px;position:relative;overflow:hidden;backdrop-filter:blur(5px)}
+.viz::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--purple),transparent);opacity:.5}
+.legend{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:14px}
+.lg{display:flex;align-items:center;gap:6px;font-size:.66rem;color:var(--dim)}
+.lg i{width:12px;height:12px;border-radius:3px;display:inline-block;border:1px solid rgba(255,255,255,.2)}
+.controls{display:flex;gap:10px;justify-content:center;margin-bottom:12px;flex-wrap:wrap;align-items:center}
+.btn{padding:10px 24px;border:none;border-radius:8px;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .2s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 4px 15px rgba(0,0,0,.3)}
+.btn:active{transform:translateY(0)}
+.b-play{background:linear-gradient(135deg,var(--purple),#7d3c98);color:#fff}
+.b-step{background:rgba(155,89,182,.1);color:var(--purple);border:1px solid var(--purple)}
+.b-reset{background:rgba(255,107,107,.1);color:var(--red);border:1px solid var(--red)}
+.speed{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:6px 14px}
+.speed label{font-size:.7rem;color:var(--dim);text-transform:uppercase;letter-spacing:1px}
+.speed input[type=range]{width:80px;accent-color:var(--purple)}
+.speed .val{font-size:.75rem;color:var(--purple);font-weight:600;min-width:35px}
+.progress-bar{height:4px;background:var(--border);border-radius:2px;margin-bottom:12px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--purple),var(--pink));border-radius:2px;transition:width .3s;width:0%}
+.status{text-align:center;color:var(--dim);font-size:.88rem;min-height:24px;margin-bottom:12px;font-weight:500}
+.status.ok{color:var(--green)}.status.hl{color:var(--gold)}.status.err{color:var(--red)}
+.desc{background:rgba(15,15,39,.8);border:1px solid var(--border);border-radius:10px;padding:14px 18px;font-size:.78rem;color:var(--dim);line-height:1.7}
+.desc b{color:var(--purple)}
+.desc .cx{display:inline-block;margin-top:6px;padding:3px 10px;background:rgba(155,89,182,.08);border:1px solid rgba(155,89,182,.2);border-radius:12px;color:var(--purple);font-size:.72rem;font-family:monospace}
+svg{display:block;margin:0 auto;max-width:100%}
+.result{background:rgba(72,208,176,.06);border:1px solid var(--green);border-radius:10px;padding:14px;text-align:center;margin-top:12px;font-size:1rem;color:var(--green);font-weight:700;display:none;animation:su .4s ease}
+.result.bad{border-color:var(--red);color:var(--red);background:rgba(255,107,107,.06)}
+.result.show{display:block}
+@keyframes su{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.log{max-height:140px;overflow-y:auto;padding:8px 10px;background:rgba(15,15,39,.6);border-radius:8px;margin-top:12px}
+.log-line{font-size:.74rem;color:var(--dim);padding:3px 0;border-bottom:1px solid rgba(31,40,51,.5);font-family:monospace}
+.log-line:last-child{border:none}
+.log-line.hl{color:var(--gold)}
+.log-line.ok{color:var(--green)}
+.log-line.bad{color:var(--red)}
+.log-line.acc{color:var(--accent)}
+/* character rows */
+.rows{display:flex;flex-direction:column;gap:9px;align-items:flex-start;overflow-x:auto;padding:6px 2px}
+.row{display:flex;gap:3px}
+.prow{transition:margin-left .35s cubic-bezier(.5,-0.3,.3,1.4)}
+.ch{position:relative;width:30px;height:36px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.95rem;font-family:Consolas,monospace;background:rgba(15,15,39,.9);border:2px solid var(--border);color:var(--text);transition:all .25s;animation:pop .2s ease;flex-shrink:0}
+.ch .ix{position:absolute;top:1px;right:3px;font-size:.52rem;color:var(--dim);font-weight:400;font-family:Segoe UI,sans-serif}
+.ch.win{border-color:var(--accent);color:var(--accent)}
+.ch.ok{border-color:var(--green);background:rgba(72,208,168,.16);color:var(--green);transform:translateY(-4px);box-shadow:0 5px 14px rgba(72,208,168,.28)}
+.ch.bad{border-color:var(--red);background:rgba(255,107,107,.16);color:var(--red);animation:shake .35s}
+.ch.hit{border-color:var(--green);background:rgba(72,208,168,.2);color:var(--green)}
+.ch.tcur{border-color:var(--gold);color:var(--gold);transform:translateY(-4px);box-shadow:0 5px 14px rgba(241,196,15,.3)}
+.ch.past{opacity:.4}
+@keyframes pop{from{transform:scale(.7);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+/* stats & readouts */
+.stats{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+.stat{padding:6px 14px;background:rgba(15,15,39,.8);border:1px solid var(--border);border-radius:8px;font-size:.72rem;color:var(--dim)}
+.stat b{color:var(--gold);font-size:.9rem;margin-left:4px}
+.ro{text-align:center;font-family:Consolas,monospace;font-size:.88rem;color:var(--gold);margin-top:12px;min-height:22px}
+.ro .ok{color:var(--green)}.ro .bad{color:var(--red)}
+/* LPS table */
+.lpwrap{background:rgba(15,15,39,.6);border:1px solid var(--border);border-radius:10px;padding:12px;margin-top:6px;overflow-x:auto}
+.lprow{display:flex;gap:3px;align-items:center;margin-bottom:5px}
+.lphead{width:42px;font-size:.62rem;color:var(--dim);text-transform:uppercase;letter-spacing:1px;text-align:right;margin-right:6px;flex-shrink:0}
+.lcell{width:30px;height:30px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.82rem;font-family:Consolas,monospace;background:rgba(10,10,46,.9);border:1.5px solid var(--border);color:var(--dim);transition:all .25s;animation:pop .2s}
+.lcell.gold{border-color:var(--gold);color:var(--gold);background:rgba(241,196,15,.12)}
+.lcell.acc{border-color:var(--accent);color:var(--accent);background:rgba(0,212,255,.1)}
+.lcell.ok{border-color:var(--green);color:var(--green);background:rgba(72,208,168,.14)}
+.lcell.bad{border-color:var(--red);color:var(--red);background:rgba(255,107,107,.14)}
+.lpptr{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.pt{padding:4px 11px;border-radius:12px;font-size:.68rem;font-family:monospace;background:rgba(10,10,46,.8);border:1px solid var(--border);color:var(--dim);animation:pop .25s}
+.pt.gold{border-color:var(--gold);color:var(--gold)}
+.pt.acc{border-color:var(--accent);color:var(--accent)}
+.pt.ok{border-color:var(--green);color:var(--green)}
+.pt.bad{border-color:var(--red);color:var(--red)}
+/* hash area */
+.hgrid{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:4px}
+.hb{background:rgba(15,15,39,.8);border:1px solid var(--border);border-radius:10px;padding:10px 18px;text-align:center;min-width:130px}
+.hb .hbl{display:block;font-size:.62rem;color:var(--dim);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px}
+.hb .hbv{font-size:1.5rem;font-weight:800;font-family:Consolas,monospace;color:var(--gold)}
+.hb .hbv.green{color:var(--green)}
+.hb .hbv.red{color:var(--red)}
+.hb .hbv.acc{color:var(--accent)}
+.rail{display:flex;gap:5px;flex-wrap:wrap;justify-content:center;margin-top:14px}
+.hbx{min-width:46px;padding:5px 4px;border-radius:7px;text-align:center;background:rgba(10,10,46,.9);border:1.5px solid var(--border);transition:all .3s;animation:pop .2s}
+.hbx .hv{display:block;font-size:.85rem;font-weight:700;font-family:Consolas,monospace;color:var(--dim)}
+.hbx .hi{display:block;font-size:.55rem;color:var(--dim);margin-top:1px}
+.hbx.cur{border-color:var(--gold);transform:scale(1.1)}.hbx.cur .hv{color:var(--gold)}
+.hbx.eq{border-color:var(--purple);background:rgba(155,89,182,.12)}.hbx.eq .hv{color:var(--purple)}
+.hbx.hit{border-color:var(--green);background:rgba(72,208,168,.14)}.hbx.hit .hv{color:var(--green)}
+.hbx.spur{border-color:var(--red);background:rgba(255,107,107,.14)}.hbx.spur .hv{color:var(--red)}
+.hbx.skip .hv{opacity:.45}
+/* tables (bad char / good suffix) */
+.tcols{display:flex;gap:18px;justify-content:center;flex-wrap:wrap;margin-top:10px}
+.tcol{background:rgba(15,15,39,.6);border:1px solid var(--border);border-radius:10px;padding:10px 14px;min-width:190px}
+.s-lbl{font-size:.62rem;color:var(--dim);text-transform:uppercase;letter-spacing:1.5px;display:block;margin-bottom:8px;text-align:center}
+.trow{display:flex;gap:6px;margin-bottom:5px;align-items:center}
+.tcell{flex:1;padding:5px 8px;border-radius:6px;text-align:center;font-size:.78rem;font-family:Consolas,monospace;font-weight:700;background:rgba(10,10,46,.9);border:1.5px solid var(--border);color:var(--dim);transition:all .25s}
+.tcell.key{flex:0 0 46px;color:var(--text)}
+.tcell.hl{border-color:var(--red);color:var(--red);background:rgba(255,107,107,.12);transform:scale(1.05)}
+.tcell.hl2{border-color:var(--gold);color:var(--gold);background:rgba(241,196,15,.12);transform:scale(1.05)}
+.tcell.hl3{border-color:var(--green);color:var(--green);background:rgba(72,208,168,.12)}
+/* AC */
+.outs{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px;min-height:34px}
+.oc{padding:7px 16px;border-radius:16px;font-size:.8rem;font-weight:700;font-family:Consolas,monospace;animation:pop .35s ease;background:rgba(10,10,46,.8);border:2px solid}
+.mkwrap{position:relative}
+.mk{position:absolute;bottom:-7px;left:4px;right:4px;height:3px;border-radius:2px}
+.mrow{display:flex;gap:4px;margin-top:4px;min-height:6px}
+.mtick{width:30px;height:5px;border-radius:3px}
+.err-msg{color:var(--red);text-align:center;padding:30px;font-size:.9rem}
+.confetti{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1000;overflow:hidden}
+.confetti .pc{position:absolute;top:-10px;animation:cf linear forwards}
+@keyframes cf{0%{top:-10px;opacity:1;transform:rotate(0)}100%{top:110%;opacity:0;transform:rotate(720deg)}}
+@media(max-width:600px){.home h1{font-size:1.5rem}.cards{grid-template-columns:1fr}.viz{padding:14px}.btn{padding:8px 16px;font-size:.78rem}}
+
+/* Theory, complexity and implementation panels — aligned with the other AlgoLab learning labs */
+.sm-learning{margin:18px 0 30px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px;color:var(--text)}
+.sm-learning .sm-head{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:16px}
+.sm-learning .sm-kicker{font-size:.7rem;color:var(--dim);letter-spacing:1.3px;font-weight:800}
+.sm-learning h3{font-size:1.2rem;color:var(--purple);margin-top:3px}
+.sm-learning .sm-lang{font-size:.8rem;color:var(--text)}
+.sm-learning select{margin-left:8px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:7px;padding:8px;font:inherit}
+.sm-learning .sm-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.sm-learning .sm-card{min-width:0;background:rgba(15,15,39,.8);border:1px solid var(--border);border-radius:10px;padding:16px;color:var(--text)}
+.sm-learning .sm-card h4{color:var(--purple);margin:0 0 8px;font-size:.95rem}
+.sm-learning .sm-card p,.sm-learning .sm-card li{color:var(--text);font-size:.86rem;line-height:1.65}
+.sm-learning .sm-card ul{padding-left:20px;margin:8px 0}
+.sm-learning .sm-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px}
+.sm-learning .sm-metric{padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px}
+.sm-learning .sm-metric b{display:block;color:var(--dim);font-size:.7rem;text-transform:uppercase;margin-bottom:4px}
+.sm-learning .sm-metric span{color:var(--green);font:600 .85rem ui-monospace,monospace}
+.sm-learning .sm-code{background:#101827;border:1px solid #344256;border-radius:9px;overflow:auto;max-height:460px;margin-top:10px}
+.sm-learning .sm-code pre{margin:0;padding:16px;min-width:max-content;color:#e5edf7;font:13px/1.65 Consolas,Monaco,monospace;tab-size:4;white-space:pre}
+.sm-learning .sm-note{font-size:.78rem;color:var(--dim)!important;margin-top:8px}
+.sm-learning .sm-special{margin-top:10px;padding:10px;border-left:3px solid var(--gold);background:rgba(241,196,15,.08);border-radius:5px}
+body[data-theme="light"] .sm-learning .sm-card{background:#f7fafc;color:#263445;border-color:#c1cfdb}
+body[data-theme="light"] .sm-learning .sm-metric,body[data-theme="light"] .sm-learning select{background:#edf3f8;color:#24394d;border-color:#b7c7d6}
+body[data-theme="light"] .sm-learning h3,body[data-theme="light"] .sm-learning .sm-card h4{color:#7041a6}
+@media(max-width:700px){.sm-learning .sm-grid{grid-template-columns:1fr}.sm-learning{padding:14px}}
+
+</style>
+<link rel="stylesheet" href="design-system.css">
+<style>
+/* String Matching Lab theme integration */
+body{background:var(--bg);color:var(--text)}
+body[data-theme="light"]{--bg:#f2f6fa;--card:#ffffff;--border:#c1cfdb;--text:#172a3b;--dim:#40556a;--accent:#075f82;--green:#087f5b;--red:#b42332;--gold:#8a6100;--orange:#9a4b00;--purple:#7041a6;--pink:#b42373;background:var(--bg)!important;color:var(--text)!important}
+body[data-theme="light"] .header{background:rgba(255,255,255,.96)!important;color:#172a3b!important}
+body[data-theme="light"] .card,body[data-theme="light"] .viz,body[data-theme="light"] .desc,body[data-theme="light"] .log,body[data-theme="light"] .stat,body[data-theme="light"] .hb,body[data-theme="light"] .lpwrap,body[data-theme="light"] .tcol{background:#fff!important;color:#263445!important;border-color:#c1cfdb!important}
+body[data-theme="light"] .ch,body[data-theme="light"] .lcell,body[data-theme="light"] .hbx,body[data-theme="light"] .tcell,body[data-theme="light"] .pt,body[data-theme="light"] .oc{background:#f3f7fa!important}
+body[data-theme="light"] .card p,body[data-theme="light"] .desc,body[data-theme="light"] .lg,body[data-theme="light"] .stat,body[data-theme="light"] .sub,body[data-theme="light"] .home .tag,body[data-theme="light"] .algo-head p{color:#40556a}
+.header .logo{flex:1}
+.header .theme-toggle{margin-left:12px}
+.back-btn:focus-visible,.btn:focus-visible,.card:focus-visible{outline:3px solid #0ea5e9;outline-offset:3px}
+@media(max-width:600px){.header{padding:12px;gap:10px;flex-wrap:wrap}.header .logo{font-size:1rem}.header .sub{display:none}}
+</style>
+<style id="algolab-shared-typography">html,body,button,input,select,textarea{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif!important}body{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}</style>
+<link rel="stylesheet" href="enhance.css"></head>
+<body data-theme="dark">
+<div class="shared-shell" id="sharedAlgoLabShell">
+<aside class="shared-sidebar" aria-label="AlgoLab navigation">
+<a class="shared-brand" href="index.html"><span class="shared-brand-mark">A</span><span><b>AlgoLab</b><small>INTERACTIVE LEARNING STUDIO</small></span></a>
+<a class="shared-home" href="index.html">← All learning labs</a>
+<div class="shared-side-title">LEARNING LABS</div>
+<nav class="shared-nav" id="sharedAlgoLabNav" aria-label="Learning labs"><a class="nav-item" href="sorting.html" ><span>Sorting Algorithms</span><small>Core algorithm lab</small></a><a class="nav-item" href="searching.html"><span>Searching Algorithms</span><small>Array, tree and graph search</small></a><a class="nav-item" href="greedy.html" ><span>Greedy Algorithms</span><small>Optimization strategies</small></a><a class="nav-item" href="dp.html" ><span>Dynamic Programming</span><small>Subproblems and recurrence</small></a><a class="nav-item" href="graph.html" ><span>Graph Algorithms</span><small>Traversal and graph structure</small></a><a class="nav-item" href="data-structures.html"><span>Data Structures</span><small>Foundational structures</small></a><a class="nav-item" href="hanoi.html" ><span>Tower of Hanoi</span><small>Recursion and puzzles</small></a><a class="nav-item active" href="string-matching.html" aria-current="page"><span>String Matching</span><small>Text and pattern algorithms</small></a><a class="nav-item" href="backtracking.html" ><span>Backtracking Algorithms</span><small>Search and constraints</small></a><a class="nav-item" href="branch-bound.html" ><span>Branch and Bound</span><small>Exact optimization</small></a><a class="nav-item" href="advanced-data-structures.html" ><span>Advanced Data Structures</span><small>Trees, queries and sets</small></a><a class="nav-item" href="cryptography-math.html" ><span>Cryptography & Mathematical Algorithms</span><small>Number theory and security</small></a><a class="nav-item" href="advanced-network-flows.html" ><span>Advanced Network Flows & Approximation</span><small>Flows and approximation</small></a></nav>
+<button type="button" class="shared-theme" id="themeToggle" aria-label="Switch theme">☾ Dark theme</button>
+<div class="shared-note"><b>Learning mode</b><p>Explore the visualizer, follow the steps, review the theory, and study the implementation examples.</p></div>
+</aside>
+<div class="shared-main" id="sharedMainContent">
+<div class="bg"><div class="orb"></div><div class="orb"></div><div class="orb"></div></div>
+<div class="header"><div class="logo">String Processing &amp; Pattern Matching</div><a class="back-btn show" href="index.html" style="display:block;text-decoration:none">← AlgoLab Home</a><button class="back-btn" id="backBtn">← Algorithms</button><div class="sub">Interactive Visualizer</div></div>
+
+<div class="home" id="homeScreen">
+<h1>String Processing & Pattern Matching</h1>
+<p class="tag">5 algorithms — from brute-force shifts to trie-based dictionary magic</p>
+<div class="cards">
+<div class="card" data-a="0"><div class="ico"> </div><h3>Naive String Matching</h3><p>The brute-force baseline: slide the window by one and re-compare every character. Watch it redundantly re-read the same text characters over and over.</p><div class="tags"><span class="tag">Brute force</span><span class="tag r">O(n·m) worst</span><span class="tag a">Shift by one</span></div></div>
+<div class="card" data-a="1"><div class="ico"> </div><h3>Knuth-Morris-Pratt (KMP)</h3><p>Build the LPS (partial match) table first — on a mismatch, jump the pattern forward using prefix knowledge. The text pointer NEVER moves backward.</p><div class="tags"><span class="tag">LPS table</span><span class="tag g">O(n+m)</span><span class="tag a">No backtracking</span></div></div>
+<div class="card" data-a="2"><div class="ico"> </div><h3>Rabin-Karp Algorithm</h3><p>Compare rolling polynomial hashes (fingerprints) first, characters only on hash hits. Small modulus included so you can watch SPURIOUS collisions happen live!</p><div class="tags"><span class="tag">Rolling hash</span><span class="tag g">O(n+m) expected</span><span class="tag r">Collision check</span></div></div>
+<div class="card" data-a="3"><div class="ico"> </div><h3>Boyer-Moore Algorithm</h3><p>Compare right-to-left, then skip with the bad-character &amp; good-suffix heuristics. Often scans far less text than the pattern length — sublinear!</p><div class="tags"><span class="tag">Right-to-left</span><span class="tag r">Skip heuristics</span><span class="tag a">Sublinear typical</span></div></div>
+<div class="card" data-a="4"><div class="ico"> ️</div><h3>Aho-Corasick Algorithm</h3><p>One trie, many patterns: failure links let a single left-to-right text scan match an entire dictionary simultaneously — even overlapping patterns.</p><div class="tags"><span class="tag">Trie + failure links</span><span class="tag g">O(n+output)</span><span class="tag a">Multi-pattern</span></div></div>
+</div>
+</div>
+
+<div class="algo" id="algoScreen" style="display:none">
+
+<!-- 0: NAIVE -->
+<div class="panel on" id="p0">
+<div class="algo-head"><h2>Naive String Matching</h2><p>Every alignment, every character — no memory of the past</p></div>
+<div class="viz">
+<div class="legend"><span class="lg"><i style="background:#0a0a2e;border-color:#00d4ff"></i>Inside window</span><span class="lg"><i style="background:rgba(72,208,168,.3)"></i>✓ comparing match</span><span class="lg"><i style="background:rgba(255,107,107,.3)"></i>✗ mismatch</span><span class="lg"><i style="background:rgba(72,208,168,.45)"></i>Found match</span></div>
+<div class="rows" id="rows0"></div>
+<div class="ro" id="ro0">text = "AABAACAADAABAABA"   pattern = "AABA"</div>
+<div class="stats" id="stats0"></div>
+<div class="log" id="log0"></div>
+<div class="result" id="res0"></div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="prog0"></div></div>
+<div class="status" id="s0">Press Play or Step to begin</div>
+<div class="controls"><button class="btn b-play" id="play0">▶ Play</button><button class="btn b-step" id="step0">Next Step</button><button class="btn b-reset" id="reset0">Reset</button><div class="speed"><label>Speed</label><input type="range" min="150" max="1500" value="550" id="spd0"><span class="val" id="spdv0">0.6s</span></div></div>
+<div class="desc"><b>How:</b> Align pattern at text[0], compare left-to-right. On any mismatch, shift the whole window right by ONE and start over from pattern[0] — zero memory, maximum repetition. <span class="cx">Time: O(n·m) worst | Space: O(1)</span></div>
+<section class="sm-learning" id="stringLearn0"></section>
+</div>
+
+<!-- 1: KMP -->
+<div class="panel" id="p1">
+<div class="algo-head"><h2>Knuth-Morris-Pratt (KMP)</h2><p>Phase 1: build LPS table · Phase 2: search without backtracking</p></div>
+<div class="viz">
+<div class="legend"><span class="lg"><i style="background:#0a0a2e;border-color:#00d4ff"></i>Window</span><span class="lg"><i style="background:rgba(241,196,15,.25);border-color:#f1c40f"></i>Pointer i / len</span><span class="lg"><i style="background:rgba(0,212,255,.2);border-color:#00d4ff"></i>Pointer being matched</span><span class="lg"><i style="background:rgba(72,208,168,.3)"></i>✓ match</span><span class="lg"><i style="background:rgba(255,107,107,.3)"></i>✗ mismatch → jump</span></div>
+<div class="lpwrap" id="lps1"></div>
+<div class="rows" id="rows1" style="margin-top:14px"></div>
+<div class="ro" id="ro1"></div>
+<div class="stats" id="stats1"></div>
+<div class="log" id="log1"></div>
+<div class="result" id="res1"></div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="prog1"></div></div>
+<div class="status" id="s1">Press Play or Step to begin</div>
+<div class="controls"><button class="btn b-play" id="play1">▶ Play</button><button class="btn b-step" id="step1">Next Step</button><button class="btn b-reset" id="reset1">Reset</button><div class="speed"><label>Speed</label><input type="range" min="150" max="1500" value="550" id="spd1"><span class="val" id="spdv1">0.6s</span></div></div>
+<div class="desc"><b>How:</b> LPS[i] = length of the longest proper prefix of P[0..i] that is also a suffix. During search a mismatch sets <b>j = LPS[j-1]</b> — the pattern slides forward over characters already known to match, and the text pointer only advances. <span class="cx">Time: O(n+m) | Space: O(m)</span></div>
+<section class="sm-learning" id="stringLearn1"></section>
+</div>
+
+<!-- 2: RABIN-KARP -->
+<div class="panel" id="p2">
+<div class="algo-head"><h2>Rabin-Karp Algorithm</h2><p>Rolling polynomial hashes — fingerprint first, verify only on hits</p></div>
+<div class="viz">
+<div class="legend"><span class="lg"><i style="background:#0a0a2e;border-color:#00d4ff"></i>Window</span><span class="lg"><i style="background:rgba(155,89,182,.3);border-color:#9b59b6"></i>Hash equals target (candidate)</span><span class="lg"><i style="background:rgba(72,208,168,.35)"></i>✓ verified match</span><span class="lg"><i style="background:rgba(255,107,107,.3)"></i>✗ spurious hit</span><span class="lg"><i style="background:rgba(241,196,15,.3);border-color:#f1c40f"></i>Current window</span></div>
+<div class="rows" id="rows2"></div>
+<div class="hgrid" id="hash2" style="margin-top:14px"></div>
+<div class="ro" id="ro2"></div>
+<div class="rail" id="rail2"></div>
+<div class="stats" id="stats2"></div>
+<div class="log" id="log2"></div>
+<div class="result" id="res2"></div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="prog2"></div></div>
+<div class="status" id="s2">Press Play or Step to begin</div>
+<div class="controls"><button class="btn b-play" id="play2">▶ Play</button><button class="btn b-step" id="step2">Next Step</button><button class="btn b-reset" id="reset2">Reset</button><div class="speed"><label>Speed</label><input type="range" min="150" max="1500" value="550" id="spd2"><span class="val" id="spdv2">0.6s</span></div></div>
+<div class="desc"><b>How:</b> Hash the pattern once. For each text window compute a rolling hash: <b>h' = ((h − T[s]·d<sup>m-1</sup>)·d + T[s+m]) mod M</b>. Hash mismatch → skip instantly. Hash match → verify characters (a <i>spurious hit</i> possible with small M — watch for it!). <span class="cx">Time: O(n+m) expected | demo: d=10, M=90</span></div>
+<section class="sm-learning" id="stringLearn2"></section>
+</div>
+
+<!-- 3: BOYER-MOORE -->
+<div class="panel" id="p3">
+<div class="algo-head"><h2>Boyer-Moore Algorithm</h2><p>Right-to-left comparison with bad-character &amp; good-suffix skips</p></div>
+<div class="viz">
+<div class="legend"><span class="lg"><i style="background:#0a0a2e;border-color:#00d4ff"></i>Window</span><span class="lg"><i style="background:rgba(0,212,255,.25)"></i>✓ compared OK</span><span class="lg"><i style="background:rgba(255,107,107,.3)"></i>✗ mismatch (rightmost first)</span><span class="lg"><i style="background:rgba(72,208,168,.35)"></i>Found match</span><span class="lg"><i style="background:rgba(241,196,15,.3)"></i>Skip landing</span></div>
+<div class="rows" id="rows3"></div>
+<div class="tcols">
+<div class="tcol"><span class="s-lbl">Bad character: last index in P</span><div id="bcT"></div></div>
+<div class="tcol"><span class="s-lbl">Good suffix: shift by matched k</span><div id="gsT"></div></div>
+</div>
+<div class="ro" id="ro3"></div>
+<div class="stats" id="stats3"></div>
+<div class="log" id="log3"></div>
+<div class="result" id="res3"></div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="prog3"></div></div>
+<div class="status" id="s3">Press Play or Step to begin</div>
+<div class="controls"><button class="btn b-play" id="play3">▶ Play</button><button class="btn b-step" id="step3">Next Step</button><button class="btn b-reset" id="reset3">Reset</button><div class="speed"><label>Speed</label><input type="range" min="150" max="1500" value="550" id="spd3"><span class="val" id="spdv3">0.6s</span></div></div>
+<div class="desc"><b>How:</b> Compare pattern RIGHT-TO-LEFT. On mismatch at j with text char c: <b>bad-char</b> shift = j − last[c], <b>good-suffix</b> shift = gs[k] for the matched suffix length k — take the MAX and leap the window forward in one jump. <span class="cx">Time: O(nm) worst, sublinear typical | Space: Oσ+m)</span></div>
+<section class="sm-learning" id="stringLearn3"></section>
+</div>
+
+<!-- 4: AHO-CORASICK -->
+<div class="panel" id="p4">
+<div class="algo-head"><h2>Aho-Corasick Algorithm</h2><p>Single scan, whole dictionary — trie + failure links (patterns: he, she, his, hers)</p></div>
+<div class="viz">
+<div class="legend"><span class="lg"><i style="background:#0a0a2e;border-color:#00d4ff"></i>Trie node</span><span class="lg"><i style="background:rgba(241,196,15,.3);border-color:#f1c40f"></i>Current state</span><span class="lg"><i style="background:transparent;border-bottom:2px dashed #e84393;height:0"></i>Failure link</span><span class="lg"><i style="background:rgba(0,212,255,.3)"></i>Edge just taken</span><span class="lg"><i style="background:rgba(255,107,107,.3)"></i>Match output</span></div>
+<div class="rows" id="acText"></div>
+<svg id="acSvg" width="660" height="450"></svg>
+<div class="s-lbl" style="margin-top:8px">Output buffer (dictionary matches)</div>
+<div class="outs" id="outs4"></div>
+<div class="log" id="log4"></div>
+<div class="result" id="res4"></div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="prog4"></div></div>
+<div class="status" id="s4">Press Play or Step to begin</div>
+<div class="controls"><button class="btn b-play" id="play4">▶ Play</button><button class="btn b-step" id="step4">Next Step</button><button class="btn b-reset" id="reset4">Reset</button><div class="speed"><label>Speed</label><input type="range" min="150" max="1500" value="550" id="spd4"><span class="val" id="spdv4">0.6s</span></div></div>
+<div class="desc"><b>How:</b> All patterns live in one trie. Failure links point to the longest proper suffix that is also a prefix — on a dead end, slide along them instead of restarting. Each text character moves the automaton ONE step; every state carries its output patterns. <span class="cx">Time: O(n + output) | Space: O(total pattern length)</span></div>
+<section class="sm-learning" id="stringLearn4"></section>
+</div>
+
+</div>
+<div class="confetti" id="confetti"></div>
+<script src="string-matching-algorithms.js"></script>
+<script src="theme.js"></script>
+<script src="string-matching-learning.js"></script>
+</div></div>
+<script src="enhance.js" defer></script></body>
+</html>

@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Advanced Data Structures | AlgoLab</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#060912;--card:#0a0a2e;--border:#1f2833;--accent:#00d4ff;--green:#48d0b0;--red:#ff6b6b;--gold:#f1c40f;--orange:#ff9f43;--purple:#9b59b6;--pink:#e84393;--text:#e0e0e0;--dim:#667080}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;overflow-x:hidden}
+.bg{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;overflow:hidden}
+.bg .orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.12;animation:of 22s ease-in-out infinite}
+.bg .orb:nth-child(1){width:400px;height:400px;background:var(--gold);top:-100px;left:-100px}
+.bg .orb:nth-child(2){width:350px;height:350px;background:var(--red);bottom:-100px;right:-100px;animation-delay:-8s}
+.bg .orb:nth-child(3){width:300px;height:300px;background:var(--accent);top:40%;left:55%;animation-delay:-15s}
+@keyframes of{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(70px,-50px) scale(1.15)}66%{transform:translate(-50px,70px) scale(.85)}}
+.hub-btn{padding:7px 13px;background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.45);border-radius:6px;color:var(--accent);font-size:.8rem;text-decoration:none;white-space:nowrap;transition:all .2s}.hub-btn:hover{background:rgba(0,212,255,.16)}
+.header{position:relative;z-index:10;background:rgba(10,10,46,.92);backdrop-filter:blur(10px);padding:14px 25px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.logo{font-size:1.3rem;font-weight:800;background:linear-gradient(135deg,var(--gold),var(--red));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sub{color:var(--dim);font-size:.75rem}
+.back-btn{padding:7px 16px;background:rgba(241,196,15,.1);border:1px solid var(--gold);border-radius:6px;color:var(--gold);font-size:.8rem;cursor:pointer;transition:all .2s;display:none}
+.back-btn:hover{background:rgba(241,196,15,.2);transform:translateX(-3px)}
+.back-btn.show{display:block}
+.home{position:relative;z-index:1;max-width:980px;margin:0 auto;padding:50px 20px;text-align:center}
+.home h1{font-size:2.2rem;margin-bottom:8px;background:linear-gradient(135deg,var(--gold),var(--red));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.home > .tag{color:var(--dim);font-size:.95rem;margin-bottom:40px;background:none;border:none;padding:0;display:block}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:18px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:26px;cursor:pointer;transition:all .3s;position:relative;overflow:hidden;text-align:left}
+.card::before{content:'';position:absolute;top:0;left:0;width:100%;height:3px;background:linear-gradient(90deg,var(--gold),var(--red));transform:scaleX(0);transition:transform .3s;transform-origin:left}
+.card:hover{transform:translateY(-6px);border-color:var(--gold);box-shadow:0 12px 40px rgba(241,196,15,.15)}
+.card:hover::before{transform:scaleX(1)}
+.card .ico{font-size:2.4rem;margin-bottom:12px}
+.card h3{color:var(--gold);font-size:1.08rem;margin-bottom:8px}
+.card p{color:var(--dim);font-size:.8rem;line-height:1.6;margin-bottom:12px}
+.tags{display:flex;gap:8px;flex-wrap:wrap}
+.tag{font-size:.65rem;padding:4px 10px;background:rgba(241,196,15,.1);border:1px solid rgba(241,196,15,.22);border-radius:12px;color:var(--gold)}
+.tag.a{background:rgba(0,212,255,.1);border-color:rgba(0,212,255,.2);color:var(--accent)}
+.tag.r{background:rgba(255,107,107,.1);border-color:rgba(255,107,107,.2);color:var(--red)}
+.tag.g{background:rgba(72,208,176,.1);border-color:rgba(72,208,176,.2);color:var(--green)}
+.algo{position:relative;z-index:1;max-width:1150px;margin:0 auto;padding:20px}
+.panel{display:none}
+.panel.on{display:block}
+.algo-head{text-align:center;margin-bottom:18px}
+.algo-head h2{color:var(--gold);font-size:1.4rem;margin-bottom:4px}
+.algo-head p{color:var(--dim);font-size:.85rem}
+.viz{background:rgba(10,10,46,.7);border:1px solid var(--border);border-radius:16px;padding:22px;min-height:300px;margin-bottom:14px;position:relative;overflow:hidden;backdrop-filter:blur(5px)}
+.viz::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:.5}
+.legend{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:12px}
+.lg{display:flex;align-items:center;gap:6px;font-size:.66rem;color:var(--dim)}
+.lg i{width:12px;height:12px;border-radius:3px;display:inline-block;border:1px solid rgba(255,255,255,.2)}
+.controls{display:flex;gap:10px;justify-content:center;margin-bottom:12px;flex-wrap:wrap;align-items:center}
+.btn{padding:10px 24px;border:none;border-radius:8px;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .2s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 4px 15px rgba(0,0,0,.3)}
+.btn:active{transform:translateY(0)}
+.b-play{background:linear-gradient(135deg,var(--gold),#e67e22);color:#060912}
+.b-step{background:rgba(241,196,15,.1);color:var(--gold);border:1px solid var(--gold)}
+.b-reset{background:rgba(255,107,107,.1);color:var(--red);border:1px solid var(--red)}
+.speed{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:6px 14px}
+.speed label{font-size:.7rem;color:var(--dim);text-transform:uppercase;letter-spacing:1px}
+.speed input[type=range]{width:80px;accent-color:var(--gold)}
+.speed .val{font-size:.75rem;color:var(--gold);font-weight:600;min-width:35px}
+.progress-bar{height:4px;background:var(--border);border-radius:2px;margin-bottom:12px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--red));border-radius:2px;transition:width .3s;width:0%}
+.status{text-align:center;color:var(--dim);font-size:.88rem;min-height:24px;margin-bottom:12px;font-weight:500}
+.status.ok{color:var(--green)}.status.hl{color:var(--gold)}.status.err{color:var(--red)}
+.desc{background:rgba(15,15,39,.8);border:1px solid var(--border);border-radius:10px;padding:14px 18px;font-size:.78rem;color:var(--dim);line-height:1.7}
+.desc b{color:var(--gold)}
+.desc .cx{display:inline-block;margin-top:6px;padding:3px 10px;background:rgba(241,196,15,.08);border:1px solid rgba(241,196,15,.18);border-radius:12px;color:var(--gold);font-size:.72rem;font-family:monospace}
+svg{display:block;margin:0 auto;max-width:100%}
+.result{background:rgba(72,208,176,.06);border:1px solid var(--green);border-radius:10px;padding:14px;text-align:center;margin-top:12px;font-size:1rem;color:var(--green);font-weight:700;display:none;animation:su .4s ease}
+.result.bad{border-color:var(--red);color:var(--red);background:rgba(255,107,107,.06)}
+.result.show{display:block}
+@keyframes su{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.log{max-height:140px;overflow-y:auto;padding:8px 10px;background:rgba(15,15,39,.6);border-radius:8px;margin-top:12px}
+.log-line{font-size:.74rem;color:var(--dim);padding:3px 0;border-bottom:1px solid rgba(31,40,51,.5);font-family:monospace}
+.log-line:last-child{border:none}
+.log-line.hl{color:var(--gold)}
+.log-line.ok{color:var(--green)}
+.log-line.bad{color:var(--red)}
+.log-line.acc{color:var(--accent)}
+/* sequence / ops chips */
+.sqwrap{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+.sq{min-width:34px;height:34px;padding:0 8px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.82rem;font-family:Consolas,monospace;background:rgba(15,15,39,.9);border:1.5px solid var(--border);color:var(--dim);transition:all .25s;animation:pop .2s}
+.sq.done{border-color:rgba(72,208,168,.5);color:rgba(72,208,168,.75)}
+.sq.cur{border-color:var(--gold);color:var(--gold);background:rgba(241,196,15,.12);transform:scale(1.15);box-shadow:0 0 10px rgba(241,196,15,.3)}
+.sq.op{border-color:var(--accent);color:var(--accent);background:rgba(0,212,255,.08);font-size:.7rem}
+@keyframes pop{from{transform:scale(.7);opacity:0}to{transform:scale(1);opacity:1}}
+/* stats */
+.stats{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+.stat{padding:6px 14px;background:rgba(15,15,39,.8);border:1px solid var(--border);border-radius:8px;font-size:.72rem;color:var(--dim)}
+.stat b{color:var(--gold);font-size:.9rem;margin-left:4px}
+/* toggle */
+.toggle{display:flex;gap:8px;justify-content:center;margin-bottom:12px}
+.tg{padding:6px 16px;border-radius:16px;font-size:.72rem;cursor:pointer;background:rgba(15,15,39,.8);border:1px solid var(--border);color:var(--dim);transition:.2s;font-weight:600}
+.tg:hover{border-color:var(--gold)}
+.tg.on{border-color:var(--gold);color:var(--gold);background:rgba(241,196,15,.1)}
+/* fenwick */
+.fen{display:flex;flex-direction:column;gap:12px;align-items:center}
+.farr{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.ab{width:64px;padding:8px 4px 5px;border-radius:8px;text-align:center;background:rgba(15,15,39,.9);border:2px solid var(--border);transition:all .3s;animation:pop .2s;position:relative}
+.ab .ai{display:block;font-size:.55rem;color:var(--dim);letter-spacing:1px}
+.ab .av{display:block;font-size:1.05rem;font-weight:800;font-family:Consolas,monospace;color:var(--text);margin-top:2px}
+.ab .abin{display:block;font-size:.58rem;font-family:Consolas,monospace;color:var(--dim);margin-top:2px}
+.ab.active{border-color:var(--gold);transform:translateY(-5px);box-shadow:0 6px 14px rgba(241,196,15,.25)}
+.ab.active .av{color:var(--gold)}
+.ab.done{border-color:var(--green);background:rgba(72,208,168,.1)}
+.ab.done .av{color:var(--green)}
+.ab.dim{opacity:.35}
+.fenlane{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;align-items:center;min-height:40px}
+.arrowsep{color:var(--dim);font-size:.85rem;font-weight:700}
+.ro{text-align:center;font-family:Consolas,monospace;font-size:.88rem;color:var(--gold);margin-top:12px;min-height:22px}
+.ro .ok{color:var(--green)}.ro .bad{color:var(--red)}
+/* trie outs */
+.outs{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:12px;min-height:34px}
+.oc{padding:7px 16px;border-radius:16px;font-size:.8rem;font-weight:700;font-family:Consolas,monospace;animation:pop .35s ease;background:rgba(10,10,46,.8);border:2px solid var(--green);color:var(--green)}
+.oc.bad{border-color:var(--red);color:var(--red)}
+.err-msg{color:var(--red);text-align:center;padding:30px;font-size:.9rem}
+.confetti{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1000;overflow:hidden}
+.confetti .pc{position:absolute;top:-10px;animation:cf linear forwards}
+@keyframes cf{0%{top:-10px;opacity:1;transform:rotate(0)}100%{top:110%;opacity:0;transform:rotate(720deg)}}
+@media(max-width:600px){.home h1{font-size:1.5rem}.cards{grid-template-columns:1fr}.viz{padding:14px}.btn{padding:8px 16px;font-size:.78rem}}
+</style>
+<style>
+
+/* AlgoLab shared typography: match the Inter-based landing page while preserving each lab's visual hierarchy. */
+html,body,button,input,select,textarea{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif!important}
+body{font-size:16px;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+.ads-learning{margin-top:18px;min-width:0;position:relative;z-index:1}
+.ads-learning .learning-head{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:12px;padding:16px 18px;border:1px solid var(--border);border-radius:14px;background:rgba(10,10,46,.92)}
+.ads-learning .eyebrow{font-size:11px;letter-spacing:.14em;font-weight:800;color:var(--accent)}
+.ads-learning .learning-head h2{font-size:22px;line-height:1.25;margin:4px 0 0;color:var(--text);background:none;-webkit-text-fill-color:initial}
+.ads-learning .code-select{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--dim);font-weight:700;white-space:nowrap}
+.ads-learning .code-select select{background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:7px;padding:8px 10px;font-size:13px;max-width:100%}
+.ads-learning .learning-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+.ads-learning .learning-card{min-width:0;border:1px solid var(--border);border-radius:14px;background:rgba(10,10,46,.86);padding:16px;color:var(--text)}
+.ads-learning .learning-card h3{font-size:16px;line-height:1.35;margin:0 0 7px;color:var(--accent)}
+.ads-learning .learning-card p{font-size:14px;line-height:1.65;margin:0 0 15px;color:#b8c2d0;overflow-wrap:anywhere}
+.ads-learning .learning-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.ads-learning .learning-tags span{font-size:12px;padding:5px 8px;border:1px solid rgba(0,212,255,.25);background:rgba(0,212,255,.07);color:var(--accent);border-radius:7px}
+.ads-learning .code-window{overflow:auto;max-width:100%;border:1px solid #26394d;border-radius:9px;background:#07111d;padding:12px}
+.ads-learning .code-window pre{margin:0;white-space:pre;overflow-x:auto;tab-size:2}
+.ads-learning .code-window code{font:12px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;color:#e5edf5}
+.ads-learning .code-note{font-size:12px!important;color:var(--dim)!important;margin:10px 0 0!important}
+@media(max-width:850px){.ads-learning .learning-grid{grid-template-columns:1fr}.ads-learning .learning-head{align-items:flex-start}}
+@media(max-width:600px){.ads-learning .learning-head{flex-direction:column}.ads-learning .learning-head h2{font-size:19px}.ads-learning .code-select{white-space:normal;flex-wrap:wrap}.ads-learning .learning-card{padding:13px}}
+
+</style>
+
+<style id="shared-shell-style">
+/* Shared navigation shell; the original educational canvas and simulation styles remain page-specific. */
+.shared-shell{min-height:100vh;display:flex;align-items:stretch;background:var(--ui-bg,#07111d);color:var(--ui-text,#f5f7fa)}
+.shared-sidebar{width:255px;flex:0 0 255px;background:#081523;border-right:1px solid var(--ui-line,#24425d);padding:24px 16px;display:flex;flex-direction:column;gap:12px;min-height:100vh;position:sticky;top:0;height:100vh;overflow:auto;z-index:100}
+.shared-brand{display:flex;gap:12px;align-items:center;padding:4px 8px 20px;text-decoration:none;color:inherit}
+.shared-brand-mark{width:40px;height:40px;flex:0 0 40px;border-radius:12px;background:linear-gradient(135deg,#22d3ee,#2385f2);display:grid;place-items:center;font-size:22px;font-weight:800;color:#07111d}
+.shared-brand b{display:block;font-size:19px;line-height:1.2;color:var(--ui-text,#f5f7fa)}
+.shared-brand small{display:block;font-size:11px;color:var(--ui-muted,#8ea6bb);margin-top:3px}
+.shared-home{display:block;text-decoration:none;padding:10px 12px;border:1px solid var(--ui-line,#24425d);border-radius:9px;color:var(--ui-muted,#8ea6bb);font-size:13px}
+.shared-home:hover{color:var(--ui-text,#f5f7fa);border-color:var(--ui-accent,#22d3ee)}
+.shared-side-title{font-size:10px;letter-spacing:1.5px;color:var(--ui-muted,#8ea6bb);font-weight:800;padding:8px 10px 2px}
+.shared-nav{display:flex;flex-direction:column;gap:3px}
+.shared-nav .nav-item{display:block;text-decoration:none;width:100%;border:1px solid transparent;background:transparent;color:var(--ui-muted,#8ea6bb);text-align:left;padding:9px 11px;border-radius:9px;margin:0;font:600 12px/1.35 var(--ui-font,Inter,"Segoe UI",Arial,sans-serif)}
+.shared-nav .nav-item:hover{background:var(--ui-panel-2,#102a43);color:var(--ui-text,#f5f7fa)}
+.shared-nav .nav-item.active{background:var(--ui-panel-2,#102a43);border-color:var(--ui-line,#24425d);color:var(--ui-text,#f5f7fa)}
+.shared-nav .nav-item small{display:block;color:var(--ui-muted,#8ea6bb);font-size:10px;font-weight:400;margin-top:3px}
+.shared-theme{width:100%;min-height:38px;border:1px solid var(--ui-line,#24425d);border-radius:9px;background:var(--ui-panel-2,#102a43);color:var(--ui-text,#f5f7fa);font:700 12px/1.2 var(--ui-font,Inter,"Segoe UI",Arial,sans-serif);padding:9px 11px;text-align:left;cursor:pointer}
+.shared-note{margin-top:auto;border:1px solid var(--ui-line,#24425d);background:var(--ui-panel,#0b1b2b);padding:12px;border-radius:12px;color:var(--ui-muted,#8ea6bb);font-size:12px}
+.shared-note b{color:var(--ui-accent,#22d3ee)}.shared-note p{margin:6px 0 0;font-size:12px;line-height:1.5}
+.shared-main{flex:1;min-width:0;width:calc(100% - 255px);padding:20px 26px;}
+body[data-theme="light"] .shared-shell{background:var(--ui-bg,#f2f6fa);color:var(--ui-text,#102033)}
+body[data-theme="light"] .shared-sidebar{background:#fff;border-color:var(--ui-line,#b7c7d6)}
+body[data-theme="light"] .shared-brand b{color:#152235}
+body[data-theme="light"] .shared-home,body[data-theme="light"] .shared-nav .nav-item{color:#465d73}
+body[data-theme="light"] .shared-nav .nav-item.active{background:#edf3f7;color:#152235;border-color:#b7c7d6}
+body[data-theme="light"] .shared-theme{background:#f7fafc;color:#102033;border-color:#b7c7d6}
+@media(max-width:900px){.shared-shell{display:block}.shared-sidebar{position:relative;width:100%;height:auto;min-height:0;max-height:none;overflow:visible;padding:12px;gap:8px;border-right:0;border-bottom:1px solid var(--ui-line,#24425d)}.shared-brand{padding:2px 4px 8px}.shared-nav{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:5px}.shared-note{display:none}.shared-main{width:100%;padding:14px}}
+</style>
+<link rel="stylesheet" href="design-system.css">
+<link rel="stylesheet" href="enhance.css"></head>
+<body data-theme="dark">
+<div class="shared-shell" id="sharedAlgoLabShell">
+<aside class="shared-sidebar" aria-label="AlgoLab navigation">
+<a class="shared-brand" href="index.html"><span class="shared-brand-mark">A</span><span><b>AlgoLab</b><small>INTERACTIVE LEARNING STUDIO</small></span></a>
+<a class="shared-home" href="index.html">← All learning labs</a>
+<div class="shared-side-title">LEARNING LABS</div>
+<nav class="shared-nav" id="sharedAlgoLabNav" aria-label="Learning labs"><a class="nav-item" href="sorting.html" ><span>Sorting Algorithms</span><small>Core algorithm lab</small></a><a class="nav-item" href="searching.html"><span>Searching Algorithms</span><small>Array, tree and graph search</small></a><a class="nav-item" href="greedy.html" ><span>Greedy Algorithms</span><small>Optimization strategies</small></a><a class="nav-item" href="dp.html" ><span>Dynamic Programming</span><small>Subproblems and recurrence</small></a><a class="nav-item" href="graph.html" ><span>Graph Algorithms</span><small>Traversal and graph structure</small></a><a class="nav-item" href="data-structures.html"><span>Data Structures</span><small>Foundational structures</small></a><a class="nav-item" href="hanoi.html" ><span>Tower of Hanoi</span><small>Recursion and puzzles</small></a><a class="nav-item" href="string-matching.html" ><span>String Matching</span><small>Text and pattern algorithms</small></a><a class="nav-item" href="backtracking.html" ><span>Backtracking Algorithms</span><small>Search and constraints</small></a><a class="nav-item" href="branch-bound.html" ><span>Branch and Bound</span><small>Exact optimization</small></a><a class="nav-item active" href="advanced-data-structures.html" aria-current="page"><span>Advanced Data Structures</span><small>Trees, queries and sets</small></a><a class="nav-item" href="cryptography-math.html" ><span>Cryptography & Mathematical Algorithms</span><small>Number theory and security</small></a><a class="nav-item" href="advanced-network-flows.html" ><span>Advanced Network Flows & Approximation</span><small>Flows and approximation</small></a></nav>
+<button type="button" class="shared-theme" id="themeToggle" aria-label="Switch theme">☾ Dark theme</button>
+<div class="shared-note"><b>Learning mode</b><p>Explore the visualizer, follow the steps, review the theory, and study the implementation examples.</p></div>
+</aside>
+<div class="shared-main" id="sharedMainContent">
+<div class="bg"><div class="orb"></div><div class="orb"></div><div class="orb"></div></div>
+<div class="header"><a href="index.html" class="hub-btn">← AlgoLab Hub</a><div class="logo">Advanced Data Structures</div><button class="back-btn" id="backBtn">← Module Home</button><div class="sub">Interactive Visualizer</div></div>
+
+<div class="home" id="homeScreen">
+<h1>Advanced Data Structure Algorithms</h1>
+<p class="tag">5 specialized structures — self-balancing trees, union-find, range queries &amp; prefix tries</p>
+<div class="cards">
+<div class="card" data-a="0"><div class="ico"> ️</div><h3>AVL Tree Rotations</h3><p>Insert values into a self-balancing BST. Watch balance factors update up the path — when any reaches ±2, LL/RR/LR/RL rotations fire to restore height balance.</p><div class="tags"><span class="tag">Self-balancing BST</span><span class="tag a">4 rotation cases</span><span class="tag r">Balance factor</span></div></div>
+<div class="card" data-a="1"><div class="ico"> ️</div><h3>Red-Black Tree Balancing</h3><p>Color-coded balancing: red insertions trigger recolor cascades and rotations so black-height stays uniform. Uncle color decides the fix-up case.</p><div class="tags"><span class="tag">Color fixing</span><span class="tag a">Uncle cases</span><span class="tag g">O(log n)</span></div></div>
+<div class="card" data-a="2"><div class="ico">  ️</div><h3>Union-Find (DSU)</h3><p>Disjoint set union with path compression and union by rank. Watch deep chains flatten into stars instantly as finds compress parent pointers.</p><div class="tags"><span class="tag">Disjoint sets</span><span class="tag a">Path compression</span><span class="tag r">Union by rank</span></div></div>
+<div class="card" data-a="3"><div class="ico"> </div><h3>Segment / Fenwick Tree</h3><p>Toggle between a Segment Tree (bottom-up build, range coverage) and a Binary Indexed Tree (binary index walks). Point updates &amp; range sums in O(log n).</p><div class="tags"><span class="tag">Range queries</span><span class="tag a">BIT binary math</span><span class="tag g">O(log n)</span></div></div>
+<div class="card" data-a="4"><div class="ico"> ️</div><h3>Trie Operations</h3><p>Prefix tree for autocomplete: insert words letter-by-letter, search with dead-end detection, and collect completions by walking a prefix subtree.</p><div class="tags"><span class="tag">Prefix tree</span><span class="tag a">Autocomplete</span><span class="tag g">Predictive text</span></div></div>
+</div>
+</div>
+
+<div class="algo" id="algoScreen" style="display:none">
+
+<!-- 0: AVL -->
+<div class="panel on" id="p0">
+<div class="algo-head"><h2>AVL Tree Rotations</h2><p>Insert sequence with live balance factors and LL/RR/LR/RL fix-ups</p></div>
+<div class="viz">
+<div class="legend"><span class="lg"><i style="background:#1a1d3e;border-color:#34495e"></i>Balanced (bf 0/±1)</span><span class="lg"><i style="background:rgba(241,196,15,.25);border-color:#f1c40f"></i>New node</span><span class="lg"><i style="background:rgba(255,107,107,.3);border-color:#ff6b6b"></i>Imbalanced (bf ±2)</span><span class="lg"><i style="background:rgba(72,208,168,.3);border-color:#48d0b0"></i>Rotating / fixed</span><span class="lg"><i style="background:rgba(0,212,255,.3)"></i>Rotation axis</span></div>
+<div class="sqwrap" id="seq0"></div>
+<svg id="svg0" width="920" height="540"></svg>
+<div class="stats" id="stats0"></div>
+<div class="log" id="log0"></div>
+<div class="result" id="res0"></div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="prog0"></div></div>
+<div class="status" id="s0">Press Play or Step to begin</div>
+<div class="controls"><button class="btn b-play" id="play0">▶ Play</button><button class="btn b-step" id="step0">Next Step</button><button class="btn b-reset" id="reset0">Reset</button><div class="speed"><label>Speed</label><input type="range" min="150" max="1500" value="550" id="spd0"><span class="val" id="spdv0">0.6s</span></div></div>
+<div class="desc"><b>How:</b> Insert like a normal BST, then walk back up updating heights. Balance factor = height(left) − height(right). If any node reaches ±2, the offending subtree rotates: <b>LL→right, RR→left, LR→left-then-right, RL→right-then-left</b>. The whole tree stays |bf| ≤ 1 → O(log n) guaranteed. <span class="cx">Time: O(log n) per insert | Space: O(n)</span></div>
+<div class="learning-lab ads-learning" id="learning0"></div>
+</div>
+
+<!-- 1: RED-BLACK -->
+<div class="panel" id="p1">
+<div class="algo-head"><h2>Red-Black Tree Balancing</h2><p>CLRS insert fix-up: recolor cascades, rotations, uncle-color cases</p></div>
+<div class="viz">
+<div class="legend"><span class="lg"><i style="background:#1a1d3e;border-color:#555"></i>Black node</span><span class="lg"><i style="background:rgba(255,107,107,.4);border-color:#ff6b6b"></i>Red node</span><span class="lg"><i style="background:rgba(241,196,15,.3);border-color:#f1c40f"></i>New / current</span><span class="lg"><i style="background:rgba(72,208,168,.3);border-color:#48d0b0"></i>Uncle / fix-up nodes</span><span class="lg"><i style="background:rgba(0,212,255,.3)"></i>Rotating</span></div>
+<div class="sqwrap" id="seq1"></div>
+<svg id="svg1" width="920" height="520"></svg>
+<div class="stats" id="stats1"></div>
+<div class="log" id="log1"></div>
+<div class="result" id="res1"></div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="prog1"></div></div>
+<div class="status" id="s1">Press Play or Step to begin</div>
+<div class="controls"><button class="btn b-play" id="play1">▶ Play</button><button class="btn b-step" id="step1">Next Step</button><button class="btn b-reset" id="reset1">Reset</button><div class="speed"><label>Speed</label><input type="range" min="150" max="1500" value="550" id="spd1"><span class="val" id="spdv1">0.6s</span></div></div>
+<div class="desc"><b>How:</b> New nodes insert RED. If parent is also red, fix: <b>Case 1</b> — uncle red → recolor parent &amp; uncle black, grandparent red, move up. <b>Case 2/3</b> — uncle black → rotate (zig-zig / zig-zag) + recolor. Root is always black. Keeps search O(log n). <span class="cx">Time: O(log n) per insert | Space: O(n)</span></div>
+<div class="learning-lab ads-learning" id="learning1"></div>
+</div>
+
+<!-- 2: UNION-FIND -->
+<div class="panel" id="p2">
+<div class="algo-head"><h2>Union-Find (Disjoint Set Union)</h2><p>Union by rank + path compression — watch chains flatten to stars</p></div>
+<div class="viz">
+<div class="legend"><span class="lg"><i style="background:rgba(72,208,168,.35);border-color:#48d0b0"></i>Root (with rank)</span><span class="lg"><i style="background:#1a1d3e;border-color:#34495e"></i>Child</span><span class="lg"><i style="background:rgba(241,196,15,.3);border-color:#f1c40f"></i>Find path / current</span><span class="lg"><i style="background:rgba(0,212,255,.3);border-color:#00d4ff"></i>Compression edge</span><span class="lg"><i style="background:rgba(232,67,147,.3)"></i>New parent link</span></div>
+<div class="sqwrap" id="ops2"></div>
+<svg id="svg2" width="920" height="420"></svg>
+<div class="stats" id="stats2"></div>
+<div class="log" id="log2"></div>
+<div class="result" id="res2"></div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="prog2"></div></div>
+<div class="status" id="s2">Press Play or Step to begin</div>
+<div class="controls"><button class="btn b-play" id="play2">▶ Play</button><button class="btn b-step" id="step2">Next Step</button><button class="btn b-reset" id="reset2">Reset</button><div class="speed"><label>Speed</label><input type="range" min="150" max="1500" value="550" id="spd2"><span class="val" id="spdv2">0.6s</span></div></div>
+<div class="desc"><b>How:</b> <b>Find(x)</b> walks parent pointers to the root — with path compression, every node on the path is re-pointed DIRECTLY to the root (chains become stars). <b>Union(a,b)</b> attaches the shallower-rank root under the deeper one. Nearly O(1) amortized per operation. <span class="cx">Time: ~O(α(n)) amortized | Space: O(n)</span></div>
+<div class="learning-lab ads-learning" id="learning2"></div>
+</div>
+
+<!-- 3: SEGMENT / FENWICK -->
+<div class="panel" id="p3">
+<div class="algo-head"><h2>Segment Tree / Fenwick Tree</h2><p>Point updates &amp; range sums — two architectures, same O(log n)</p></div>
+<div class="viz">
+<div class="toggle"><button class="tg on" id="tg3s">  Segment Tree</button><button class="tg" id="tg3f">  Fenwick (BIT)</button></div>
+<div class="sqwrap" id="ops3"></div>
+<div id="segView">
+<div class="legend"><span class="lg"><i style="background:rgba(241,196,15,.3);border-color:#f1c40f"></i>Update path</span><span class="lg"><i style="background:rgba(72,208,168,.3);border-color:#48d0b0"></i>Query takes node</span><span class="lg"><i style="background:#1a1d3e;border-color:#34495e"></i>Untouched</span><span class="lg"><i style="background:rgba(255,107,107,.25)"></i>Skipped (no overlap)</span></div>
+<svg id="svg3" width="780" height="430"></svg>
+</div>
+<div id="fenView" style="display:none">
+<div class="legend"><span class="lg"><i style="background:rgba(241,196,15,.3);border-color:#f1c40f"></i>Active index</span><span class="lg"><i style="background:rgba(72,208,168,.3);border-color:#48d0b0"></i>Accumulated</span><span class="lg"><i style="background:#1a1d3e;border-color:#34495e"></i>Untouched</span></div>
+<div class="fen">
+<div class="farr" id="fenArr"></div>
+<div class="fenlane" id="fenLane"></div>
+<div class="ro" id="fenRo"></div>
+</div>
+</div>
+<div class="stats" id="stats3"></div>
+<div class="log" id="log3"></div>
+<div class="result" id="res3"></div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="prog3"></div></div>
+<div class="status" id="s3">Press Play or Step to begin</div>
+<div class="controls"><button class="btn b-play" id="play3">▶ Play</button><button class="btn b-step" id="step3">Next Step</button><button class="btn b-reset" id="reset3">Reset</button><div class="speed"><label>Speed</label><input type="range" min="150" max="1500" value="550" id="spd3"><span class="val" id="spdv3">0.6s</span></div></div>
+<div class="desc"><b>Segment tree:</b> binary tree of ranges — queries descend, taking fully-covered nodes (green), skipping disjoint ones (red). <b>Fenwick:</b> each index i owns a power-of-two range; walks use <b>i += lsb(i)</b> (update) / <b>i −= lsb(i)</b> (prefix). Both do point-update + range-sum in O(log n). <span class="cx">Time: O(log n) update &amp; query | Space: O(n)</span></div>
+<div class="learning-lab ads-learning" id="learning3"></div>
+</div>
+
+<!-- 4: TRIE -->
+<div class="panel" id="p4">
+<div class="algo-head"><h2>Trie Operations</h2><p>Insert · Search · Autocomplete — dictionary {car, card, cart, cat, dog}</p></div>
+<div class="viz">
+<div class="legend"><span class="lg"><i style="background:#1a1d3e;border-color:#34495e"></i>Node</span><span class="lg"><i style="background:rgba(72,208,168,.35);border-color:#48d0b0"></i>Active path</span><span class="lg"><i style="background:rgba(241,196,15,.35);border-color:#f1c40f"></i>New node / current</span><span class="lg"><i style="background:rgba(255,107,107,.35);border-color:#ff6b6b"></i>Dead end (fail)</span><span class="lg"><i style="background:#f1c40f"></i>★ word end</span></div>
+<div class="sqwrap" id="ops4"></div>
+<svg id="svg4" width="660" height="470"></svg>
+<div class="s-lbl" style="font-size:.62rem;color:var(--dim);text-transform:uppercase;letter-spacing:1.5px;text-align:center;margin-top:8px">Results / autocomplete output</div>
+<div class="outs" id="outs4"></div>
+<div class="stats" id="stats4"></div>
+<div class="log" id="log4"></div>
+<div class="result" id="res4"></div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="prog4"></div></div>
+<div class="status" id="s4">Press Play or Step to begin</div>
+<div class="controls"><button class="btn b-play" id="play4">▶ Play</button><button class="btn b-step" id="step4">Next Step</button><button class="btn b-reset" id="reset4">Reset</button><div class="speed"><label>Speed</label><input type="range" min="150" max="1500" value="550" id="spd4"><span class="val" id="spdv4">0.6s</span></div></div>
+<div class="desc"><b>How:</b> Each node = a prefix. <b>Insert</b> walks/creates edges and stars the final node. <b>Search</b> walks edges — a missing edge is a dead end (prefix ≠ word unless ★). <b>Autocomplete</b> walks to the prefix then collects every ★ node in its subtree. <span class="cx">Time: O(length) per op | Space: O(total chars)</span></div>
+<div class="learning-lab ads-learning" id="learning4"></div>
+</div>
+
+</div>
+<div class="confetti" id="confetti"></div>
+<script src="advanced-data-structures.js"></script>
+<script src="advanced-data-structures-learning.js"></script>
+</div></div>
+<script src="theme.js"></script>
+<script src="enhance.js" defer></script></body>
+</html>

@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tower of Hanoi | AlgoLab</title>
+
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #060912; color: #e0e0e0; font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; }
+.header { background: #0a0a2e; padding: 14px 25px; border-bottom: 1px solid #1f2833; display: flex; justify-content: space-between; align-items: center; }
+.logo { font-size: 1.3rem; font-weight: bold; color: #00d4ff; }
+.sub { color: #667080; font-size: 0.8rem; }
+.main { max-width: 800px; margin: 0 auto; padding: 25px 20px; }
+.row { display: flex; gap: 10px; justify-content: center; margin-bottom: 15px; flex-wrap: wrap; align-items: center; }
+.stat { background: #0a0a2e; border: 1px solid #1f2833; border-radius: 8px; padding: 8px 18px; text-align: center; min-width: 100px; }
+.slabel { color: #667080; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px; }
+.sval { color: #00d4ff; font-size: 1.3rem; font-weight: bold; }
+.sval.gold { color: #f1c40f; }
+.sval.green { color: #48d0b0; }
+.diff-label { color: #667080; font-size: 0.8rem; }
+.dbtn { width: 34px; height: 34px; border-radius: 50%; border: 1px solid #1f2833; background: #0a0a2e; color: #8892b0; font-weight: 600; cursor: pointer; font-size: 0.85rem; }
+.dbtn:hover { border-color: #00d4ff; color: #00d4ff; }
+.dbtn.on { background: #00d4ff; color: #060912; border-color: #00d4ff; }
+.board { background: #0a0a2e; border: 1px solid #1f2833; border-radius: 12px; padding: 20px; margin-bottom: 15px; user-select: none; }
+.pegs-wrap { display: flex; justify-content: space-around; height: 300px; align-items: flex-end; }
+.peg-col { width: 30%; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; cursor: pointer; position: relative; }
+.pole { width: 6px; height: 200px; background: #34495e; border-radius: 3px; position: absolute; bottom: 30px; left: 50%; margin-left: -3px; }
+.base { width: 140px; height: 8px; background: #2c3e50; border-radius: 4px; }
+.plabel { color: #667080; font-size: 0.7rem; margin-top: 6px; text-transform: uppercase; letter-spacing: 3px; transition: color 0.2s; }
+.peg-col:hover .plabel { color: #00d4ff; }
+.peg-col.sel .plabel { color: #f1c40f; font-weight: bold; }
+.disk-stack { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column-reverse; align-items: center; }
+.disk { height: 26px; border-radius: 5px; margin-top: 2px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: bold; color: rgba(0,0,0,0.7); transition: all 0.25s ease; box-shadow: 0 2px 5px rgba(0,0,0,0.4); position: relative; z-index: 2; }
+.disk.top-sel { outline: 2px solid #f1c40f; outline-offset: 2px; transform: translateY(-6px); }
+@keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+.shake { animation: shake 0.3s ease; }
+.status { text-align: center; color: #8892b0; font-size: 0.85rem; min-height: 22px; margin-bottom: 12px; }
+.status.err { color: #ff6b6b; }
+.status.ok { color: #48d0b0; }
+.controls { display: flex; gap: 10px; justify-content: center; margin-bottom: 15px; flex-wrap: wrap; }
+.btn { padding: 10px 22px; border: none; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+.btn:hover { filter: brightness(1.15); }
+.btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.b1 { background: #00d4ff; color: #060912; }
+.b2 { background: #1a1d3e; color: #00d4ff; border: 1px solid #00d4ff; }
+.b3 { background: #1a1d3e; color: #ff6b6b; border: 1px solid #ff6b6b; }
+.b4 { background: #48d0b0; color: #060912; }
+.info { background: #0f0f27; border: 1px solid #1f2833; border-radius: 8px; padding: 14px; font-size: 0.8rem; color: #667080; line-height: 1.6; }
+.info b { color: #00d4ff; }
+.overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(6,9,18,0.88); z-index: 200; justify-content: center; align-items: center; }
+.overlay.show { display: flex; }
+.wbox { background: #0a0a2e; border: 2px solid #48d0b0; border-radius: 16px; padding: 40px 50px; text-align: center; }
+.wtitle { font-size: 2rem; color: #48d0b0; margin-bottom: 10px; }
+.wmoves { color: #f1c40f; font-size: 1.2rem; margin-bottom: 4px; }
+.wopt { color: #667080; font-size: 0.9rem; margin-bottom: 20px; }
+
+/* AlgoLab integration: consistent typography, navigation, accessible contrast and responsive layout. */
+:root { color-scheme: dark; }
+body { font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+.header { gap: 16px; flex-wrap: wrap; }
+.logo { display:flex; align-items:baseline; gap:10px; }
+.nav-link,.theme-toggle { color:#e7f0f8; text-decoration:none; background:#132d46; border:1px solid #35536d; border-radius:8px; padding:8px 11px; font:600 12px/1.2 inherit; cursor:pointer; white-space:nowrap; }
+.nav-link:hover,.theme-toggle:hover { border-color:#22d3ee; }
+.info { color:#c0cedb; font-size:13px; }
+.slabel,.diff-label,.plabel { color:#b0c2d4; }
+.status { color:#c0cedb; }
+/* Light theme overrides intentionally cover every surface and small label. */
+body[data-theme="light"] { color-scheme:light; background:#f2f6fa; color:#172536; }
+body[data-theme="light"] .header { background:#fff; border-bottom-color:#cbd7e2; }
+body[data-theme="light"] .logo { color:#075985; }
+body[data-theme="light"] .sub { color:#526579; }
+body[data-theme="light"] .main { background:transparent; }
+body[data-theme="light"] .stat,body[data-theme="light"] .board,body[data-theme="light"] .info { background:#fff; border-color:#c7d4e0; }
+body[data-theme="light"] .slabel,body[data-theme="light"] .diff-label,body[data-theme="light"] .plabel,body[data-theme="light"] .status,body[data-theme="light"] .info { color:#405469; }
+body[data-theme="light"] .sval { color:#075985; }
+body[data-theme="light"] .sval.gold { color:#8a5a00; }
+body[data-theme="light"] .sval.green { color:#087f5b; }
+body[data-theme="light"] .dbtn { background:#fff; color:#34495e; border-color:#b7c7d5; }
+body[data-theme="light"] .dbtn.on { background:#087eaa; color:#fff; border-color:#087eaa; }
+body[data-theme="light"] .pole { background:#9aabba; }
+body[data-theme="light"] .base { background:#71879b; }
+body[data-theme="light"] .b2,body[data-theme="light"] .b3 { background:#fff; }
+body[data-theme="light"] .b2 { color:#075985; border-color:#1684a8; }
+body[data-theme="light"] .b3 { color:#b42332; border-color:#cf3543; }
+body[data-theme="light"] .nav-link,body[data-theme="light"] .theme-toggle { background:#f4f8fb; color:#173047; border-color:#bdcbd8; }
+body[data-theme="light"] .wbox { background:#fff; }
+body[data-theme="light"] .wopt { color:#526579; }
+body[data-theme="light"] .status.err { color:#b42332; }
+body[data-theme="light"] .status.ok { color:#087f5b; }
+@media (max-width:700px) { .header { padding:12px 16px; } .header>div:last-child { width:100%; flex-wrap:wrap; } .main { padding:18px 12px; } .board { padding:10px 5px; } .pegs-wrap { height:260px; } .base { width:min(140px,95%); } .wbox { margin:14px; padding:28px 20px; } }
+
+
+/* Algorithm theory and language examples, styled to match the sorting labs. */
+.learning-lab{max-width:1100px;margin:28px auto 36px;padding:0 20px;color:var(--learn-text,#dce7f2)}
+.learning-head{display:flex;justify-content:space-between;align-items:end;gap:18px;flex-wrap:wrap;margin-bottom:16px}
+.learning-head h2{font-size:clamp(1.45rem,2.6vw,2rem);margin-top:5px;color:inherit}
+.learning-eyebrow{font-size:.76rem;letter-spacing:.12em;font-weight:800;color:#0891b2}
+.learning-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:16px}
+.learning-card{min-width:0;padding:20px;border:1px solid #2b4358;border-radius:12px;background:#0b1b2a;color:#dce7f2;line-height:1.65}
+.learning-card h3{font-size:1rem;margin:0 0 7px;color:#67e8f9}
+.learning-card p{margin:0 0 15px;font-size:.94rem}
+.learning-card ul{padding-left:20px;margin:0 0 14px}
+.learning-card li{margin:4px 0}
+.learning-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.learning-tag{border:1px solid #35546e;background:#122c43;border-radius:999px;padding:5px 10px;font-size:.8rem;color:#dbeafe}
+.complexity-table{width:100%;border-collapse:collapse;margin:8px 0 14px;font-size:.9rem}
+.complexity-table th,.complexity-table td{padding:8px 9px;text-align:left;border-bottom:1px solid #30485c}
+.complexity-table th{color:#9fb5c9;font-weight:700}.complexity-table td:last-child{font-weight:700;color:#67e8f9}
+.code-select{display:flex;align-items:center;gap:8px;font-size:.85rem;font-weight:700}
+.code-select select{background:#10283c;color:#e6f0fa;border:1px solid #3c5b74;border-radius:7px;padding:9px 12px;font:inherit}
+.code-window{height:420px;overflow:auto;background:#07111d;border:1px solid #263e52;border-radius:9px;margin-top:10px}
+.code-window pre{margin:0;padding:17px;min-width:max-content;white-space:pre}
+.code-window code{font:13px/1.7 ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace;color:#e5edf5;tab-size:4}
+.tok-keyword{color:#c792ea}.tok-string{color:#c3e88d}.tok-number{color:#f78c6c}.tok-comment{color:#8293a7;font-style:italic}.tok-function{color:#82aaff}
+.code-note{font-size:.8rem;color:#9fb3c7;margin-top:9px}
+.special-note{border-left:3px solid #0ea5e9;padding:9px 12px;background:#10283a;border-radius:0 7px 7px 0}
+body[data-theme="light"] .learning-lab{color:#172536}
+body[data-theme="light"] .learning-eyebrow{color:#075985}
+body[data-theme="light"] .learning-card{background:#fff;border-color:#c7d4e0;color:#26394c;box-shadow:0 2px 8px rgba(24,48,72,.05)}
+body[data-theme="light"] .learning-card h3{color:#075985}
+body[data-theme="light"] .learning-tag{background:#edf6fb;border-color:#b7d0e2;color:#23445d}
+body[data-theme="light"] .complexity-table th{color:#526579}
+body[data-theme="light"] .complexity-table th,body[data-theme="light"] .complexity-table td{border-bottom-color:#d9e2ea}
+body[data-theme="light"] .complexity-table td:last-child{color:#075985}
+body[data-theme="light"] .code-select select{background:#fff;color:#172536;border-color:#b7c7d5}
+body[data-theme="light"] .special-note{background:#eef7fc;color:#23445d}
+@media(max-width:760px){.learning-lab{padding:0 12px}.learning-grid{grid-template-columns:1fr}.code-window{height:360px}.learning-card{padding:16px}}
+
+</style>
+<link rel="stylesheet" href="design-system.css">
+<style id="algolab-shared-typography">html,body,button,input,select,textarea{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif!important}body{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}</style>
+<link rel="stylesheet" href="enhance.css"></head>
+<body data-theme="dark">
+<div class="shared-shell" id="sharedAlgoLabShell">
+<aside class="shared-sidebar" aria-label="AlgoLab navigation">
+<a class="shared-brand" href="index.html"><span class="shared-brand-mark">A</span><span><b>AlgoLab</b><small>INTERACTIVE LEARNING STUDIO</small></span></a>
+<a class="shared-home" href="index.html">← All learning labs</a>
+<div class="shared-side-title">LEARNING LABS</div>
+<nav class="shared-nav" id="sharedAlgoLabNav" aria-label="Learning labs"><a class="nav-item" href="sorting.html" ><span>Sorting Algorithms</span><small>Core algorithm lab</small></a><a class="nav-item" href="searching.html"><span>Searching Algorithms</span><small>Array, tree and graph search</small></a><a class="nav-item" href="greedy.html" ><span>Greedy Algorithms</span><small>Optimization strategies</small></a><a class="nav-item" href="dp.html" ><span>Dynamic Programming</span><small>Subproblems and recurrence</small></a><a class="nav-item" href="graph.html" ><span>Graph Algorithms</span><small>Traversal and graph structure</small></a><a class="nav-item" href="data-structures.html"><span>Data Structures</span><small>Foundational structures</small></a><a class="nav-item active" href="hanoi.html" aria-current="page"><span>Tower of Hanoi</span><small>Recursion and puzzles</small></a><a class="nav-item" href="string-matching.html" ><span>String Matching</span><small>Text and pattern algorithms</small></a><a class="nav-item" href="backtracking.html" ><span>Backtracking Algorithms</span><small>Search and constraints</small></a><a class="nav-item" href="branch-bound.html" ><span>Branch and Bound</span><small>Exact optimization</small></a><a class="nav-item" href="advanced-data-structures.html" ><span>Advanced Data Structures</span><small>Trees, queries and sets</small></a><a class="nav-item" href="cryptography-math.html" ><span>Cryptography & Mathematical Algorithms</span><small>Number theory and security</small></a><a class="nav-item" href="advanced-network-flows.html" ><span>Advanced Network Flows & Approximation</span><small>Flows and approximation</small></a></nav>
+<div class="shared-note"><b>Learning mode</b><p>Explore the visualizer, follow the steps, review the theory, and study the implementation examples.</p></div>
+</aside>
+<div class="shared-main" id="sharedMainContent">
+
+<div class="header">
+  <h1 class="logo" style="margin:0;font-size:inherit;line-height:inherit"><a href="index.html" style="color:inherit;text-decoration:none">AlgoLab</a> <span style="font-size:.85rem;color:#e0e0e0;font-weight:500">/ Tower of Hanoi</span></h1>
+  <div style="display:flex;gap:12px;align-items:center"><a href="index.html" class="nav-link">All learning labs</a><button id="themeToggle" class="theme-toggle" type="button" aria-label="Switch theme">☼ Light theme</button><div class="sub">Select a peg, then choose a destination</div></div>
+</div>
+
+<div class="main">
+  <div class="row">
+    <span class="diff-label">Disks:</span>
+    <button class="dbtn" data-n="3">3</button>
+    <button class="dbtn on" data-n="4">4</button>
+    <button class="dbtn" data-n="5">5</button>
+    <button class="dbtn" data-n="6">6</button>
+    <button class="dbtn" data-n="7">7</button>
+    <button class="dbtn" data-n="8">8</button>
+  </div>
+
+  <div class="row">
+    <div class="stat"><div class="slabel">Moves</div><div class="sval" id="moves">0</div></div>
+    <div class="stat"><div class="slabel">Optimal</div><div class="sval gold" id="optimal">15</div></div>
+    <div class="stat"><div class="slabel">Disks</div><div class="sval" id="diskN">4</div></div>
+    <div class="stat"><div class="slabel">Best</div><div class="sval green" id="best">-</div></div>
+  </div>
+
+  <div class="board">
+    <div class="pegs-wrap">
+      <div class="peg-col" id="peg0" data-p="0">
+        <div class="disk-stack" id="stack0"></div>
+        <div class="pole"></div>
+        <div class="base"></div>
+        <div class="plabel">A</div>
+      </div>
+      <div class="peg-col" id="peg1" data-p="1">
+        <div class="disk-stack" id="stack1"></div>
+        <div class="pole"></div>
+        <div class="base"></div>
+        <div class="plabel">B</div>
+      </div>
+      <div class="peg-col" id="peg2" data-p="2">
+        <div class="disk-stack" id="stack2"></div>
+        <div class="pole"></div>
+        <div class="base"></div>
+        <div class="plabel">C</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="status" id="status">Ready</div>
+
+  <div class="controls">
+    <button class="btn b2" id="undoBtn" disabled>Undo</button>
+    <button class="btn b3" id="resetBtn">Reset</button>
+    <button class="btn b1" id="solveBtn">Auto Solve</button>
+    <button class="btn b4" id="hintBtn">Hint</button>
+  </div>
+
+  <div class="info">
+    <b>How to use:</b> Select a peg to pick up its top disk, then select a destination peg. Use Hint for the next optimal move, or Auto Solve to watch the solution.
+    <br><br><b>Rules:</b> Move all disks from peg A to peg C. Only the top disk of a peg can be moved.
+    A larger disk can never sit on a smaller one.<br>
+    <b>Optimal</b> for N disks = 2<sup>N</sup> - 1. Try to beat it!
+  </div>
+</div>
+
+
+<section class="learning-lab" id="hanoiLearning">
+  <div class="learning-head">
+    <div><div class="learning-eyebrow">ALGORITHM KNOWLEDGE</div><h2>Tower of Hanoi — Theory & Implementation</h2></div>
+    <label class="code-select" for="hanoiLanguage">Language <select id="hanoiLanguage"><option>C</option><option>C++</option><option selected>Python</option><option>Java</option><option>JavaScript</option></select></label>
+  </div>
+  <div class="learning-grid">
+    <article class="learning-card">
+      <h3>How it works</h3>
+      <p>Tower of Hanoi is a classic recursion problem with three pegs and disks of different sizes. The goal is to move the complete stack from the source peg to the destination peg while preserving the order of disk sizes.</p>
+      <h3>Recursive strategy</h3>
+      <ol>
+        <li>Move the top <em>n − 1</em> disks from the source to the auxiliary peg.</li>
+        <li>Move the largest disk from the source to the destination.</li>
+        <li>Move the <em>n − 1</em> disks from the auxiliary peg to the destination.</li>
+      </ol>
+      <h3>Rules</h3>
+      <ul><li>Move only one disk at a time.</li><li>Only the top disk of a peg may be moved.</li><li>A larger disk must never be placed on a smaller disk.</li></ul>
+      <h3>Where it is useful</h3>
+      <p>Learning recursion, tracing the call stack, understanding divide-and-conquer style problem decomposition, recurrence relations, and analysing exponential algorithms.</p>
+      <h3>When to be careful</h3>
+      <p>The move count grows exponentially. Recursive code is elegant for explanation, but becomes impractical for large disk counts when every move must be displayed or executed.</p>
+      <div class="learning-tags"><span class="learning-tag">Recursion</span><span class="learning-tag">Base case: n = 1</span><span class="learning-tag">Minimum moves: 2ⁿ − 1</span></div>
+    </article>
+    <article class="learning-card">
+      <h3>Complexity & special cases</h3>
+      <table class="complexity-table"><tbody>
+        <tr><th>Best-case time</th><td>Θ(2ⁿ)</td></tr>
+        <tr><th>Average-case time</th><td>Θ(2ⁿ)</td></tr>
+        <tr><th>Worst-case time</th><td>Θ(2ⁿ)</td></tr>
+        <tr><th>Auxiliary space</th><td>Θ(n)</td></tr>
+      </tbody></table>
+      <p>The recurrence is <strong>T(n) = 2T(n − 1) + 1</strong>, with <strong>T(1) = 1</strong>. Solving it gives <strong>T(n) = 2ⁿ − 1</strong> moves. The recursive call stack reaches a depth proportional to n.</p>
+      <div class="special-note"><strong>Special cases</strong><br>• For n = 0, no move is required (base case may return immediately).<br>• For n = 1, move the disk directly from source to destination.<br>• The standard three-peg puzzle has a proven minimum of 2ⁿ − 1 moves; this exact bound does not apply unchanged to variants with extra pegs or different rules.<br>• The interactive lab allows 3–8 disks; the code below accepts any non-negative n supported by the language's recursion and integer limits.</div>
+      <h3 style="margin-top:18px">Implementation</h3>
+      <div class="code-window"><pre><code id="hanoiCode"></code></pre></div>
+      <p class="code-note">Readable, syntax-coloured recursive implementations. Select a language above to switch the code.</p>
+    </article>
+  </div>
+</section>
+
+<div class="overlay" id="overlay">
+  <div class="wbox">
+    <div class="wtitle">You Win!</div>
+    <div class="wmoves" id="wMoves">15 moves</div>
+    <div class="wopt" id="wOpt">Optimal: 15</div>
+    <button class="btn b1" id="againBtn">Play Again</button>
+  </div>
+</div>
+
+
+<script>
+(function(){
+const examples={
+'C':`#include <stdio.h>\n\nvoid hanoi(int n, char source, char auxiliary, char destination) {\n    if (n <= 0) return;\n\n    hanoi(n - 1, source, destination, auxiliary);\n    printf("Move disk %d: %c -> %c\\n", n, source, destination);\n    hanoi(n - 1, auxiliary, source, destination);\n}\n\nint main(void) {\n    int disks = 4;\n    hanoi(disks, 'A', 'B', 'C');\n    return 0;\n}`,
+'C++':`#include <iostream>\nusing namespace std;\n\nvoid hanoi(int n, char source, char auxiliary, char destination) {\n    if (n <= 0) return;\n\n    hanoi(n - 1, source, destination, auxiliary);\n    cout << "Move disk " << n << ": " << source << " -> " << destination << '\\n';\n    hanoi(n - 1, auxiliary, source, destination);\n}\n\nint main() {\n    int disks = 4;\n    hanoi(disks, 'A', 'B', 'C');\n    return 0;\n}`,
+'Python':`def hanoi(n, source, auxiliary, destination):\n    if n <= 0:\n        return\n\n    hanoi(n - 1, source, destination, auxiliary)\n    print(f"Move disk {n}: {source} -> {destination}")\n    hanoi(n - 1, auxiliary, source, destination)\n\n\nif __name__ == "__main__":\n    disks = 4\n    hanoi(disks, "A", "B", "C")`,
+'Java':`public class TowerOfHanoi {\n    static void hanoi(int n, char source, char auxiliary, char destination) {\n        if (n <= 0) return;\n\n        hanoi(n - 1, source, destination, auxiliary);\n        System.out.printf("Move disk %d: %c -> %c%n", n, source, destination);\n        hanoi(n - 1, auxiliary, source, destination);\n    }\n\n    public static void main(String[] args) {\n        int disks = 4;\n        hanoi(disks, 'A', 'B', 'C');\n    }\n}`,
+'JavaScript':`function hanoi(n, source, auxiliary, destination) {\n    if (n <= 0) return;\n\n    hanoi(n - 1, source, destination, auxiliary);\n    console.log(\`Move disk \${n}: \${source} -> \${destination}\`);\n    hanoi(n - 1, auxiliary, source, destination);\n}\n\nconst disks = 4;\nhanoi(disks, "A", "B", "C");`
+};
+const escapeHtml=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function highlight(source){const token=/\/\*[\s\S]*?\*\/|\/\/[^\n]*|#[^\n]*|`(?:\\.|[^`\\])*`|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|\b(?:\d+(?:\.\d+)?)\b|\b(?:def|return|for|while|if|else|elif|break|continue|in|and|or|True|False|None|new|class|static|void|int|float|double|bool|boolean|char|long|short|const|let|var|function|public|private|final|this|auto|include|using|namespace|import|from)\b|\b[A-Za-z_$][A-Za-z0-9_$]*(?=\s*\()/g;let out='',pos=0,m;while((m=token.exec(source))){out+=escapeHtml(source.slice(pos,m.index));let v=m[0],kind='tok-function';if(v.startsWith('//')||v.startsWith('#')||v.startsWith('/*'))kind='tok-comment';else if(v[0]==='"'||v[0]==="'"||v[0]==='`')kind='tok-string';else if(/^\d/.test(v))kind='tok-number';else if(/^(def|return|for|while|if|else|elif|break|continue|in|and|or|True|False|None|new|class|static|void|int|float|double|bool|boolean|char|long|short|const|let|var|function|public|private|final|this|auto|include|using|namespace|import|from)$/.test(v))kind='tok-keyword';out+='<span class="'+kind+'">'+escapeHtml(v)+'</span>';pos=m.index+v.length;}return out+escapeHtml(source.slice(pos));}
+const select=document.getElementById('hanoiLanguage'),code=document.getElementById('hanoiCode');function update(){code.innerHTML=highlight(examples[select.value]);}select.addEventListener('change',update);update();
+})();
+</script>
+
+<script>
+(function() {
+  var N = 4;
+  var pegs = [[], [], []];
+  var moves = 0;
+  var sel = -1;
+  var hist = [];
+  var best = {};
+  var busy = false;
+  var auto = false;
+  var timer = null;
+
+  var COLORS = ['#ff6b6b','#ff9f43','#f1c40f','#48d0b0','#00d4ff','#9b59b6','#e84393','#fd79a8'];
+
+  var $ = function(id) { return document.getElementById(id); };
+  var statusEl = $('status');
+  var movesEl = $('moves');
+  var optEl = $('optimal');
+  var diskNEl = $('diskN');
+  var bestEl = $('best');
+  var undoBtn = $('undoBtn');
+  var resetBtn = $('resetBtn');
+  var solveBtn = $('solveBtn');
+  var hintBtn = $('hintBtn');
+  var overlay = $('overlay');
+
+  function opt(n) { return (1 << n) - 1; }
+
+  function width(v) {
+    return 55 + ((v - 1) / (N - 1)) * 110;
+  }
+
+  function name(i) { return String.fromCharCode(65 + i); }
+
+  function say(msg, cls) {
+    statusEl.textContent = msg;
+    statusEl.className = 'status' + (cls ? ' ' + cls : '');
+  }
+
+  function init() {
+    pegs = [[], [], []];
+    for (var i = N; i >= 1; i--) pegs[0].push(i);
+    moves = 0; sel = -1; hist = []; busy = false; auto = false;
+    if (timer) { clearInterval(timer); timer = null; }
+    solveBtn.textContent = 'Auto Solve';
+    solveBtn.disabled = false;
+    hintBtn.disabled = false;
+    overlay.classList.remove('show');
+    movesEl.textContent = '0';
+    optEl.textContent = opt(N);
+    diskNEl.textContent = N;
+    bestEl.textContent = best[N] || '-';
+    say('Ready - click a peg to start');
+    draw();
+  }
+
+  function draw() {
+    for (var p = 0; p < 3; p++) {
+      var stack = $('stack' + p);
+      stack.innerHTML = '';
+      var col = $('peg' + p);
+      col.className = 'peg-col' + (sel === p ? ' sel' : '');
+      for (var i = 0; i < pegs[p].length; i++) {
+        var v = pegs[p][i];
+        var d = document.createElement('div');
+        d.className = 'disk' + (sel === p && i === pegs[p].length - 1 ? ' top-sel' : '');
+        d.style.width = width(v) + 'px';
+        d.style.background = COLORS[(v - 1) % 8];
+        d.textContent = v;
+        stack.appendChild(d);
+      }
+    }
+    undoBtn.disabled = hist.length === 0 || busy;
+  }
+
+  function shake(p) {
+    var el = $('peg' + p);
+    el.classList.add('shake');
+    setTimeout(function() { el.classList.remove('shake'); }, 350);
+  }
+
+  function solved() { return pegs[2].length === N; }
+
+  function onWin() {
+    auto = false;
+    if (timer) { clearInterval(timer); timer = null; }
+    solveBtn.textContent = 'Auto Solve';
+    solveBtn.disabled = false;
+    hintBtn.disabled = false;
+    if (!best[N] || moves < best[N]) { best[N] = moves; bestEl.textContent = moves; }
+    var o = opt(N);
+    setTimeout(function() {
+      $('wMoves').textContent = moves + ' moves';
+      $('wOpt').textContent = 'Optimal: ' + o + (moves === o ? ' - Perfect!' : ' - Try again for optimal!');
+      overlay.classList.add('show');
+    }, 1500);
+  }
+
+  function tryMove(from, to) {
+    if (pegs[from].length === 0) { say('Peg ' + name(from) + ' is empty', 'err'); shake(to); return false; }
+    var d = pegs[from][pegs[from].length - 1];
+    if (pegs[to].length > 0 && pegs[to][pegs[to].length - 1] < d) {
+      say('Cannot place ' + d + ' on ' + pegs[to][pegs[to].length - 1], 'err'); shake(to); return false;
+    }
+    pegs[from].pop(); pegs[to].push(d);
+    hist.push({ f: from, t: to });
+    moves++; movesEl.textContent = moves;
+    sel = -1;
+    say('Moved ' + d + ': ' + name(from) + ' -> ' + name(to), 'ok');
+    draw();
+    if (solved()) onWin();
+    return true;
+  }
+
+  // peg clicks
+  for (var p = 0; p < 3; p++) {
+    (function(idx) {
+      $('peg' + idx).addEventListener('click', function() {
+        if (busy || auto) return;
+        if (sel === -1) {
+          if (pegs[idx].length === 0) { say('Peg ' + name(idx) + ' is empty', 'err'); shake(idx); return; }
+          sel = idx;
+          say('Disk ' + pegs[idx][pegs[idx].length - 1] + ' selected - click target');
+          draw();
+        } else if (sel === idx) {
+          sel = -1; say('Deselected'); draw();
+        } else {
+          tryMove(sel, idx);
+        }
+      });
+    })(p);
+  }
+
+  undoBtn.addEventListener('click', function() {
+    if (hist.length === 0 || busy || auto) return;
+    var h = hist.pop();
+    var d = pegs[h.t].pop();
+    pegs[h.f].push(d);
+    moves = Math.max(0, moves - 1);
+    movesEl.textContent = moves;
+    sel = -1;
+    overlay.classList.remove('show');
+    say('Undo');
+    draw();
+  });
+
+  resetBtn.addEventListener('click', function() { init(); });
+
+  // difficulty
+  var dbtns = document.querySelectorAll('.dbtn');
+  for (var i = 0; i < dbtns.length; i++) {
+    (function(btn) {
+      btn.addEventListener('click', function() {
+        for (var j = 0; j < dbtns.length; j++) dbtns[j].classList.remove('on');
+        btn.classList.add('on');
+        N = parseInt(btn.getAttribute('data-n'));
+        init();
+      });
+    })(dbtns[i]);
+  }
+
+  $('againBtn').addEventListener('click', function() { overlay.classList.remove('show'); init(); });
+
+  // hint - compute next optimal move
+  function stateKey(s) {
+    return s[0].join(',') + '|' + s[1].join(',') + '|' + s[2].join(',');
+  }
+
+  function nextOptimal() {
+    if (pegs[2].length === N) return null;
+    var start = [pegs[0].slice(), pegs[1].slice(), pegs[2].slice()];
+    var goalKey = '';
+    for (var i = N; i >= 1; i--) goalKey += (i === N ? '' : ',') + i;
+    goalKey = ',' + goalKey + '|';
+    var visited = {};
+    visited[stateKey(start)] = true;
+    var queue = [{ s: start, path: [] }];
+    while (queue.length > 0) {
+      var node = queue.shift();
+      for (var f = 0; f < 3; f++) {
+        if (node.s[f].length === 0) continue;
+        var top = node.s[f][node.s[f].length - 1];
+        for (var t = 0; t < 3; t++) {
+          if (f === t) continue;
+          if (node.s[t].length > 0 && node.s[t][node.s[t].length - 1] < top) continue;
+          var ns = [node.s[0].slice(), node.s[1].slice(), node.s[2].slice()];
+          ns[f].pop(); ns[t].push(top);
+          var key = stateKey(ns);
+          if (visited[key]) continue;
+          var newPath = node.path.slice();
+          newPath.push({ f: f, t: t });
+          if (ns[2].length === N) return newPath[0];
+          visited[key] = true;
+          queue.push({ s: ns, path: newPath });
+        }
+      }
+    }
+    return null;
+  }
+
+  function fullPath() {
+    if (pegs[2].length === N) return [];
+    var start = [pegs[0].slice(), pegs[1].slice(), pegs[2].slice()];
+    var visited = {};
+    visited[stateKey(start)] = true;
+    var queue = [{ s: start, path: [] }];
+    while (queue.length > 0) {
+      var node = queue.shift();
+      for (var f = 0; f < 3; f++) {
+        if (node.s[f].length === 0) continue;
+        var top = node.s[f][node.s[f].length - 1];
+        for (var t = 0; t < 3; t++) {
+          if (f === t) continue;
+          if (node.s[t].length > 0 && node.s[t][node.s[t].length - 1] < top) continue;
+          var ns = [node.s[0].slice(), node.s[1].slice(), node.s[2].slice()];
+          ns[f].pop(); ns[t].push(top);
+          var key = stateKey(ns);
+          if (visited[key]) continue;
+          var newPath = node.path.slice();
+          newPath.push({ f: f, t: t });
+          if (ns[2].length === N) return newPath;
+          visited[key] = true;
+          queue.push({ s: ns, path: newPath });
+        }
+      }
+    }
+    return null;
+  }
+
+  hintBtn.addEventListener('click', function() {
+    if (busy || auto) return;
+    var mv = nextOptimal();
+    if (mv) {
+      say('Hint: move disk from ' + name(mv.f) + ' to ' + name(mv.t));
+      var el = $('peg' + mv.f);
+      el.classList.add('sel');
+      setTimeout(function() { draw(); }, 1500);
+    }
+  });
+
+  // auto solve
+  solveBtn.addEventListener('click', function() {
+    if (auto) { auto = false; if (timer) { clearInterval(timer); timer = null; } solveBtn.textContent = 'Auto Solve'; hintBtn.disabled = false; return; }
+    overlay.classList.remove('show');
+    var path = fullPath();
+    if (!path || path.length === 0) { say('Already solved!', 'ok'); return; }
+    var idx = 0;
+    auto = true;
+    solveBtn.textContent = 'Stop';
+    hintBtn.disabled = true;
+    sel = -1;
+    draw();
+    timer = setInterval(function() {
+      if (!auto) { clearInterval(timer); timer = null; solveBtn.textContent = 'Auto Solve'; hintBtn.disabled = false; return; }
+      if (idx >= path.length) {
+        auto = false; clearInterval(timer); timer = null;
+        solveBtn.textContent = 'Auto Solve'; solveBtn.disabled = false; hintBtn.disabled = false;
+        onWin();
+        return;
+      }
+      var mv = path[idx++];
+      var d = pegs[mv.f].pop();
+      pegs[mv.t].push(d);
+      hist.push(mv);
+      moves++; movesEl.textContent = moves;
+      say('Moving ' + d + ': ' + name(mv.f) + ' -> ' + name(mv.t), 'ok');
+      draw();
+      if (idx >= path.length) {
+        auto = false; clearInterval(timer); timer = null;
+        solveBtn.textContent = 'Auto Solve'; solveBtn.disabled = false; hintBtn.disabled = false;
+        onWin();
+      }
+    }, 800);
+  });
+
+  var themeToggle = $('themeToggle');
+  function setTheme(theme) {
+    document.body.setAttribute('data-theme', theme);
+    try { localStorage.setItem('algolab-theme', theme); } catch (e) {}
+    if (themeToggle) themeToggle.textContent = theme === 'light' ? '☾ Dark theme' : '☼ Light theme';
+    if (themeToggle) themeToggle.setAttribute('aria-label', theme === 'light' ? 'Switch to dark theme' : 'Switch to light theme');
+  }
+  if (themeToggle) themeToggle.addEventListener('click', function() {
+    setTheme(document.body.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
+  });
+  var savedTheme = 'dark';
+  try { savedTheme = localStorage.getItem('algolab-theme') === 'light' ? 'light' : 'dark'; } catch (e) {}
+  setTheme(savedTheme);
+  init();
+})();
+</script>
+<script src="theme.js"></script>
+</div></div>
+<script src="enhance.js" defer></script></body>
+</html>

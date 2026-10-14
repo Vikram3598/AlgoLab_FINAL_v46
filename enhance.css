@@ -1,0 +1,146 @@
+/* AlgoLab interactivity enhancements (v47) — additive layer, both themes. */
+
+/* ---------- Floating action buttons ---------- */
+.al-fabs{position:fixed;right:14px;bottom:14px;z-index:1000;display:flex;flex-direction:column;gap:8px;align-items:flex-end}
+.al-fab{appearance:none;border:1px solid var(--ui-line,#2b4a63);background:var(--ui-card,#142d46);color:var(--ui-text,#f5f7fa);
+  font:600 12px/1 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  padding:9px 13px;border-radius:10px;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.28);
+  transition:transform .15s ease,border-color .15s ease,background .15s ease,opacity .2s ease;opacity:.92}
+.al-fab:hover,.al-fab:focus-visible{transform:translateY(-2px);opacity:1;border-color:var(--ui-accent,#22d3ee);outline:none}
+.al-fab-key{background:linear-gradient(135deg,#2385f2,#1c6fd8);border-color:transparent;color:#fff}
+.al-fab.off{opacity:.6;text-decoration:line-through}
+.al-fab-top{display:none}
+.al-fab-top.show{display:block}
+
+/* ---------- Toasts ---------- */
+.al-toasts{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:1200;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
+.al-toast{background:var(--ui-card,#142d46);color:var(--ui-text,#f5f7fa);border:1px solid var(--ui-line,#2b4a63);
+  border-radius:10px;padding:9px 16px;font:600 12.5px/1 Inter,ui-sans-serif,system-ui,"Segoe UI",Roboto,Arial,sans-serif;
+  box-shadow:0 10px 26px rgba(0,0,0,.32);opacity:0;transform:translateY(10px);transition:opacity .25s ease,transform .25s ease}
+.al-toast.in{opacity:1;transform:translateY(0)}
+
+/* ---------- Command palette ---------- */
+.al-palette{position:fixed;inset:0;z-index:1300;display:none;align-items:flex-start;justify-content:center;
+  background:rgba(4,10,18,.62);backdrop-filter:blur(3px);padding:9vh 16px 16px}
+.al-palette.open{display:flex}
+.al-pal-card{width:min(560px,96vw);background:var(--ui-panel,#0d1f33);border:1px solid var(--ui-line,#2b4a63);
+  border-radius:14px;box-shadow:0 24px 60px rgba(0,0,0,.5);overflow:hidden;display:flex;flex-direction:column;max-height:74vh}
+.al-pal-head{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--ui-line,#2b4a63)}
+.al-pal-head input{flex:1;background:var(--ui-bg,#07111d);border:1px solid var(--ui-line,#2b4a63);color:var(--ui-text,#f5f7fa);
+  border-radius:9px;padding:10px 12px;font:500 14px/1.2 Inter,ui-sans-serif,system-ui,"Segoe UI",Roboto,Arial,sans-serif;outline:none}
+.al-pal-head input:focus{border-color:var(--ui-accent,#22d3ee)}
+.al-pal-esc{font:600 10px/1 Inter,system-ui,sans-serif;color:var(--ui-muted,#a7b9c9);border:1px solid var(--ui-line,#2b4a63);
+  border-radius:6px;padding:5px 7px;white-space:nowrap}
+.al-pal-list{overflow:auto;padding:8px;flex:1}
+.al-pal-grp{font:700 10px/1 Inter,system-ui,sans-serif;letter-spacing:1.4px;text-transform:uppercase;color:var(--ui-muted,#a7b9c9);padding:10px 10px 6px}
+.al-pal-item{display:block;width:100%;text-align:left;background:transparent;border:0;color:var(--ui-text,#f5f7fa);
+  font:500 13.5px/1.3 Inter,ui-sans-serif,system-ui,"Segoe UI",Roboto,Arial,sans-serif;padding:10px 12px;border-radius:9px;cursor:pointer}
+.al-pal-item.sel,.al-pal-item:hover{background:var(--ui-card,#142d46);outline:none}
+.al-pal-item.sel{box-shadow:inset 0 0 0 1px var(--ui-accent,#22d3ee)}
+.al-pal-empty{padding:22px;text-align:center;color:var(--ui-muted,#a7b9c9);font:500 13px/1 Inter,system-ui,sans-serif}
+.al-pal-foot{padding:9px 14px;border-top:1px solid var(--ui-line,#2b4a63);color:var(--ui-muted,#a7b9c9);font:500 11px/1 Inter,system-ui,sans-serif}
+
+/* ---------- Shortcut help ---------- */
+.al-help{position:fixed;inset:0;z-index:1300;display:none;align-items:center;justify-content:center;
+  background:rgba(4,10,18,.62);backdrop-filter:blur(3px);padding:16px}
+.al-help.open{display:flex}
+.al-help-card{width:min(460px,96vw);background:var(--ui-panel,#0d1f33);border:1px solid var(--ui-line,#2b4a63);
+  border-radius:14px;box-shadow:0 24px 60px rgba(0,0,0,.5);overflow:hidden}
+.al-help-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--ui-line,#2b4a63);
+  font:700 14px/1 Inter,ui-sans-serif,system-ui,"Segoe UI",Roboto,Arial,sans-serif;color:var(--ui-text,#f5f7fa)}
+.al-help-x{background:transparent;border:1px solid var(--ui-line,#2b4a63);color:var(--ui-muted,#a7b9c9);border-radius:8px;
+  padding:6px 10px;font:600 11px/1 Inter,system-ui,sans-serif;cursor:pointer}
+.al-help-x:hover{color:var(--ui-text,#f5f7fa);border-color:var(--ui-accent,#22d3ee)}
+.al-help-body{padding:12px 16px;display:flex;flex-direction:column;gap:9px;max-height:56vh;overflow:auto}
+.al-help-row{display:flex;align-items:center;gap:12px}
+.al-help-row kbd{min-width:96px;text-align:center;background:var(--ui-bg,#07111d);border:1px solid var(--ui-line,#2b4a63);
+  border-radius:7px;padding:6px 8px;font:600 11px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--ui-accent,#22d3ee)}
+.al-help-row span{font:500 12.5px/1.35 Inter,ui-sans-serif,system-ui,"Segoe UI",Roboto,Arial,sans-serif;color:var(--ui-text,#f5f7fa)}
+.al-help-foot{padding:10px 16px;border-top:1px solid var(--ui-line,#2b4a63);color:var(--ui-muted,#a7b9c9);font:500 11px/1 Inter,system-ui,sans-serif}
+
+/* ---------- Copy buttons on code blocks ---------- */
+pre{position:relative}
+.al-copy{position:absolute;top:8px;right:8px;z-index:5;background:var(--ui-card,#142d46);color:var(--ui-text,#f5f7fa);
+  border:1px solid var(--ui-line,#2b4a63);border-radius:7px;padding:5px 10px;cursor:pointer;
+  font:600 10.5px/1 Inter,ui-sans-serif,system-ui,"Segoe UI",Roboto,Arial,sans-serif;letter-spacing:.3px;
+  opacity:0;transition:opacity .18s ease,border-color .15s ease}
+pre:hover .al-copy,.al-copy:focus-visible{opacity:1;outline:none;border-color:var(--ui-accent,#22d3ee)}
+.al-copy:hover{background:var(--ui-accent,#22d3ee);color:#04202b}
+
+/* ---------- Explored markers ---------- */
+.card.al-explored{position:relative}
+.card.al-explored::after{content:"\2713";position:absolute;top:8px;right:10px;font:700 12px/1 Inter,system-ui,sans-serif;
+  color:#22c55e;background:rgba(34,197,94,.14);border:1px solid rgba(34,197,94,.4);border-radius:6px;padding:3px 7px}
+.shared-sidebar .al-explored::after,
+.sidebar .al-explored::after,
+#algoNav .al-explored::after{content:"\2713";position:static;display:inline-block;margin-left:6px;
+  color:#22c55e;background:none;border:0;padding:0;font-size:10px;vertical-align:middle}
+.al-cardprog{display:inline-flex;align-items:center;gap:6px;margin-top:6px;font:600 10.5px/1 Inter,system-ui,sans-serif;color:var(--ui-muted,#a7b9c9)}
+.al-cardprog i{display:inline-block;height:4px;width:40px;border-radius:3px;background:var(--ui-line,#2b4a63);position:relative;overflow:hidden}
+.al-cardprog i::after{content:"";position:absolute;left:0;top:0;bottom:0;width:inherit;background:linear-gradient(90deg,#2385f2,#22d3ee)}
+.al-cardprog em{font-style:normal}
+.al-labprog{display:flex;align-items:center;gap:8px;margin-top:10px;font:600 11px/1 Inter,system-ui,sans-serif;color:var(--ui-muted,#a7b9c9)}
+.al-labprog-bar{display:inline-block;height:5px;width:74px;border-radius:3px;background:var(--ui-line,#2b4a63);position:relative;overflow:hidden}
+.al-labprog-bar i{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#2385f2,#22d3ee);border-radius:3px;transition:width .4s ease}
+.al-resume{margin-left:10px}
+
+/* ---------- Mobile sidebar toggle ---------- */
+.al-navtoggle{display:none}
+
+/* ---------- Keyboard hint chip ---------- */
+.al-hintchip{position:fixed;left:14px;bottom:14px;z-index:1000;display:flex;align-items:center;gap:8px;
+  background:var(--ui-card,#142d46);border:1px solid var(--ui-line,#2b4a63);color:var(--ui-muted,#a7b9c9);
+  border-radius:10px;padding:8px 10px 8px 12px;font:500 11.5px/1 Inter,ui-sans-serif,system-ui,"Segoe UI",Roboto,Arial,sans-serif;
+  box-shadow:0 6px 18px rgba(0,0,0,.28);animation:alChipIn .4s ease both}
+.al-hintchip b{color:var(--ui-accent,#22d3ee);font:700 10px/1 Inter,system-ui,sans-serif;letter-spacing:1px;text-transform:uppercase}
+.al-hintchip kbd{background:var(--ui-bg,#07111d);border:1px solid var(--ui-line,#2b4a63);border-radius:5px;padding:3px 5px;
+  font:600 10px/1 ui-monospace,Menlo,Consolas,monospace;color:var(--ui-text,#f5f7fa)}
+.al-hintchip button{background:transparent;border:0;color:var(--ui-muted,#a7b9c9);cursor:pointer;font:700 14px/1 Inter,system-ui,sans-serif;padding:0 2px}
+.al-hintchip button:hover{color:var(--ui-text,#f5f7fa)}
+@keyframes alChipIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* ---------- Responsive ---------- */
+@media(max-width:900px){
+  .al-navtoggle{display:flex;align-items:center;justify-content:space-between;width:100%;appearance:none;
+    background:var(--ui-card,#142d46);border:1px solid var(--ui-line,#2b4a63);color:var(--ui-text,#f5f7fa);
+    font:600 12px/1 Inter,ui-sans-serif,system-ui,"Segoe UI",Roboto,Arial,sans-serif;
+    padding:10px 12px;border-radius:10px;cursor:pointer;margin-bottom:2px}
+  .al-navtoggle .al-chev{width:9px;height:9px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;
+    transform:rotate(45deg);transition:transform .2s ease;margin-right:2px}
+  .shared-sidebar.al-nav-collapsed .al-navtoggle .al-chev{transform:rotate(-135deg)}
+  .shared-sidebar.al-nav-collapsed .shared-nav{display:none}
+  .shared-sidebar.al-nav-collapsed .shared-module-divider{display:none}
+  .shared-sidebar.al-nav-collapsed .shared-note{display:none}
+  .al-hintchip{left:10px;right:10px;bottom:70px;justify-content:center;flex-wrap:wrap;text-align:center}
+  .al-fabs{right:10px;bottom:10px}
+  .al-fab{padding:8px 11px;font-size:11px}
+}
+@media(max-width:520px){
+  .al-pal-card{max-height:82vh}
+  .al-help-row kbd{min-width:78px}
+}
+
+/* ---------- Light theme adjustments ---------- */
+body[data-theme="light"] .al-fab,
+body[data-theme="light"] .al-toast,
+body[data-theme="light"] .al-pal-card,
+body[data-theme="light"] .al-help-card,
+body[data-theme="light"] .al-hintchip{box-shadow:0 8px 22px rgba(20,45,70,.16)}
+body[data-theme="light"] .al-palette,
+body[data-theme="light"] .al-help{background:rgba(20,40,60,.42)}
+body[data-theme="light"] .al-copy{background:#eef4fa;color:#22303f;border-color:#c1cfdb}
+body[data-theme="light"] .al-copy:hover{background:#2385f2;color:#fff}
+body[data-theme="light"] .al-pal-head input{background:#fff;color:#22303f}
+body[data-theme="light"] .al-pal-item{color:#22303f}
+body[data-theme="light"] .al-pal-item.sel,
+body[data-theme="light"] .al-pal-item:hover{background:#e8f0f8}
+body[data-theme="light"] .al-help-row kbd{background:#eef4fa;color:#1c6fd8}
+body[data-theme="light"] .al-help-row span{color:#22303f}
+body[data-theme="light"] .al-navtoggle{background:#fff;color:#22303f;border-color:#c1cfdb}
+body[data-theme="light"] .al-hintchip{background:#fff;border-color:#c1cfdb;color:#4a5b6b}
+
+/* ---------- Reduced motion ---------- */
+@media(prefers-reduced-motion:reduce){
+  .al-fab,.al-toast,.al-hintchip,.al-pal-item{transition:none;animation:none}
+  .al-labprog-bar i{transition:none}
+}

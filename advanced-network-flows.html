@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Advanced Network Flows & Approximation | AlgoLab</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#060912;--card:#0a0a2e;--border:#1f2833;--accent:#00d4ff;--green:#48d0b0;--red:#ff6b6b;--gold:#f1c40f;--purple:#9b59b6;--pink:#e84393;--text:#e0e0e0;--dim:#667080}
+body{background:var(--bg);color:var(--text);font-family:Inter,"Segoe UI",Arial,sans-serif;font-size:14px;line-height:1.55;min-height:100vh;overflow-x:hidden}button,input,select,textarea{font:inherit}
+.bg{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;overflow:hidden}
+.bg .orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.12;animation:of 22s ease-in-out infinite}
+.bg .orb:nth-child(1){width:400px;height:400px;background:var(--accent);top:-100px;left:-100px}
+.bg .orb:nth-child(2){width:350px;height:350px;background:var(--purple);bottom:-100px;right:-100px;animation-delay:-8s}
+.bg .orb:nth-child(3){width:300px;height:300px;background:var(--gold);top:40%;left:55%;animation-delay:-15s}
+@keyframes of{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(70px,-50px) scale(1.15)}66%{transform:translate(-50px,70px) scale(.85)}}
+.header{position:relative;z-index:10;background:rgba(10,10,46,.92);backdrop-filter:blur(10px);padding:14px 25px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.logo{font-size:1.3rem;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sub{color:var(--dim);font-size:.75rem}
+.back-btn{padding:7px 16px;background:rgba(0,212,255,.1);border:1px solid var(--accent);border-radius:6px;color:var(--accent);font-size:.8rem;cursor:pointer;transition:all .2s;display:none}
+.back-btn:hover{background:rgba(0,212,255,.2);transform:translateX(-3px)}
+.back-btn.show{display:block}
+.home{position:relative;z-index:1;max-width:980px;margin:0 auto;padding:50px 20px;text-align:center}
+.home h1{font-size:2.2rem;margin-bottom:8px;background:linear-gradient(135deg,var(--accent),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.home > .tag{color:var(--dim);font-size:.95rem;margin-bottom:40px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:18px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:26px;cursor:pointer;transition:all .3s;position:relative;overflow:hidden;text-align:left}
+.card::before{content:'';position:absolute;top:0;left:0;width:100%;height:3px;background:linear-gradient(90deg,var(--accent),var(--purple));transform:scaleX(0);transition:transform .3s;transform-origin:left}
+.card:hover{transform:translateY(-6px);border-color:var(--accent);box-shadow:0 12px 40px rgba(0,212,255,.15)}
+.card:hover::before{transform:scaleX(1)}
+.card .ico{font-size:2.4rem;margin-bottom:12px}
+.card h3{color:var(--accent);font-size:1.08rem;margin-bottom:8px}
+.card p{color:var(--dim);font-size:.8rem;line-height:1.6;margin-bottom:12px}
+.tags{display:flex;gap:8px;flex-wrap:wrap}
+.tag{font-size:.65rem;padding:4px 10px;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.22);border-radius:12px;color:var(--accent)}
+.tag.p{background:rgba(155,89,182,.12);border-color:rgba(155,89,182,.25);color:var(--purple)}
+.tag.r{background:rgba(255,107,107,.1);border-color:rgba(255,107,107,.2);color:var(--red)}
+.tag.g{background:rgba(72,208,176,.1);border-color:rgba(72,208,176,.2);color:var(--green)}
+.algo{position:relative;z-index:1;max-width:1150px;margin:0 auto;padding:20px}
+.panel{display:none}
+.panel.on{display:block}
+.algo-head{text-align:center;margin-bottom:18px}
+.algo-head h2{color:var(--accent);font-size:1.4rem;margin-bottom:4px}
+.algo-head p{color:var(--dim);font-size:.85rem}
+.viz{background:rgba(10,10,46,.7);border:1px solid var(--border);border-radius:16px;padding:22px;min-height:300px;margin-bottom:14px;position:relative;overflow:hidden;backdrop-filter:blur(5px)}
+.viz::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--accent),transparent);opacity:.5}
+.legend{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:12px}
+.lg{display:flex;align-items:center;gap:6px;font-size:.66rem;color:var(--dim)}
+.lg i{width:12px;height:12px;border-radius:3px;display:inline-block;border:1px solid rgba(255,255,255,.2)}
+.controls{display:flex;gap:10px;justify-content:center;margin-bottom:12px;flex-wrap:wrap;align-items:center}
+.btn{padding:10px 24px;border:none;border-radius:8px;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .2s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 4px 15px rgba(0,0,0,.3)}
+.btn:active{transform:translateY(0)}
+.b-play{background:linear-gradient(135deg,var(--accent),#0984e3);color:#060912}
+.b-step{background:rgba(0,212,255,.1);color:var(--accent);border:1px solid var(--accent)}
+.b-reset{background:rgba(255,107,107,.1);color:var(--red);border:1px solid var(--red)}
+.speed{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:6px 14px}
+.speed label{font-size:.7rem;color:var(--dim);text-transform:uppercase;letter-spacing:1px}
+.speed input[type=range]{width:80px;accent-color:var(--accent)}
+.speed .val{font-size:.75rem;color:var(--accent);font-weight:600;min-width:35px}
+.progress-bar{height:4px;background:var(--border);border-radius:2px;margin-bottom:12px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--purple));border-radius:2px;transition:width .3s;width:0%}
+.status{text-align:center;color:var(--dim);font-size:.88rem;min-height:24px;margin-bottom:12px;font-weight:500}
+.status.ok{color:var(--green)}.status.hl{color:var(--accent)}.status.err{color:var(--red)}
+.desc{background:rgba(15,15,39,.8);border:1px solid var(--border);border-radius:10px;padding:14px 18px;font-size:.78rem;color:var(--dim);line-height:1.7}
+.desc b{color:var(--accent)}
+.desc .cx{display:inline-block;margin-top:6px;padding:3px 10px;background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.18);border-radius:12px;color:var(--accent);font-size:.72rem;font-family:monospace}
+.result{background:rgba(72,208,176,.06);border:1px solid var(--green);border-radius:10px;padding:14px;text-align:center;margin-top:12px;font-size:1rem;color:var(--green);font-weight:700;display:none;animation:su .4s ease}
+.result.bad{border-color:var(--red);color:var(--red);background:rgba(255,107,107,.06)}
+.result.show{display:block}
+@keyframes su{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.log{max-height:150px;overflow-y:auto;padding:8px 10px;background:rgba(15,15,39,.6);border-radius:8px;margin-top:12px}
+.log-line{font-size:.74rem;color:var(--dim);padding:3px 0;border-bottom:1px solid rgba(31,40,51,.5);font-family:monospace}
+.log-line:last-child{border:none}
+.log-line.hl{color:var(--accent)}.log-line.ok{color:var(--green)}.log-line.bad{color:var(--red)}
+.sqwrap{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+.sq{min-width:34px;height:34px;padding:0 8px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.82rem;font-family:Consolas,monospace;background:rgba(15,15,39,.9);border:1.5px solid var(--border);color:var(--dim);transition:all .25s;animation:pop .2s}
+.sq.done{border-color:rgba(72,208,168,.5);color:rgba(72,208,168,.75)}
+.sq.cur{border-color:var(--accent);color:var(--accent);background:rgba(0,212,255,.12);transform:scale(1.12);box-shadow:0 0 10px rgba(0,212,255,.3)}
+.sq.op{border-color:var(--purple);color:var(--purple);background:rgba(155,89,182,.08);font-size:.7rem}
+@keyframes pop{from{transform:scale(.7);opacity:0}to{transform:scale(1);opacity:1}}
+.stats{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+.stat{padding:6px 14px;background:rgba(15,15,39,.8);border:1px solid var(--border);border-radius:8px;font-size:.72rem;color:var(--dim)}
+.stat b{color:var(--accent);font-size:.9rem;margin-left:4px}
+.confetti{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1000;overflow:hidden}
+.confetti .pc{position:absolute;top:-10px;animation:cf linear forwards}
+@keyframes cf{0%{top:-10px;opacity:1;transform:rotate(0)}100%{top:110%;opacity:0;transform:rotate(720deg)}}
+/* flow network */
+.fgrid{display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(2,78px);gap:8px;max-width:680px;margin:0 auto 14px;align-items:center;justify-items:center}
+.fnode{width:82px;height:64px;border-radius:12px;background:#1a1d3e;border:1.5px solid #34495e;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:800;font-size:.95rem;color:#9aa3b5;transition:all .3s;animation:pop .3s}
+.fnode .fnrole{font-size:.55rem;letter-spacing:1.2px;color:var(--dim);margin-top:3px;text-transform:uppercase}
+.fnode.src{border-color:var(--accent);color:var(--accent)}
+.fnode.snk{border-color:var(--gold);color:var(--gold)}
+.fnode.path{border-color:var(--gold);color:var(--gold);background:rgba(241,196,15,.14);transform:scale(1.1);box-shadow:0 0 14px rgba(241,196,15,.4)}
+.fnode.cutin{border-color:var(--green);color:var(--green);background:rgba(72,208,176,.16);box-shadow:0 0 10px rgba(72,208,176,.3)}
+.fnode.cutout{border-style:dashed;opacity:.7}
+.fpath{text-align:center;font-family:Consolas,monospace;font-size:.95rem;color:var(--gold);min-height:30px;margin-bottom:10px;letter-spacing:.4px;animation:pop .3s}
+.flevels{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:10px;min-height:30px}
+.flv{padding:5px 10px;border-radius:8px;background:rgba(155,89,182,.1);border:1px solid rgba(155,89,182,.45);color:var(--purple);font-size:.68rem;font-family:Consolas,monospace;animation:pop .25s}
+.fedges{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:6px}
+.fedge{display:flex;align-items:center;gap:10px;padding:7px 12px;background:rgba(15,15,39,.85);border:1.5px solid var(--border);border-radius:9px;animation:pop .25s;font-family:Consolas,monospace;font-size:.82rem;transition:all .3s}
+.fedge .feu{color:var(--text);width:86px}
+.fedge .fef{color:var(--dim);width:60px;text-align:right}
+.fedge .etrack{flex:1;height:8px;background:#101426;border-radius:4px;overflow:hidden}
+.fedge .efill{height:100%;background:linear-gradient(90deg,var(--accent),var(--purple));transition:width .35s;border-radius:4px}
+.fedge.onpath{border-color:var(--gold);box-shadow:0 0 8px rgba(241,196,15,.3)}
+.fedge.onpath .efill{background:linear-gradient(90deg,var(--gold),#e67e22)}
+.fedge.onpath .fef{color:var(--gold)}
+.fedge.rev .feu{color:var(--purple)}
+.fedge.rev .efill{background:linear-gradient(90deg,var(--purple),var(--pink))}
+.fedge.sat{border-color:rgba(255,107,107,.55)}
+.fedge.sat .fef{color:var(--red)}
+.fedge.cutedge{border-color:var(--green);background:rgba(72,208,176,.08);box-shadow:0 0 8px rgba(72,208,176,.25)}
+.fedge.cutedge .fef{color:var(--green);font-weight:800}
+/* vertex cover */
+.vcverts{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:16px}
+.vcv{width:54px;height:54px;border-radius:50%;background:#1a1d3e;border:1.5px solid #34495e;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.95rem;color:#9aa3b5;transition:all .3s;animation:pop .3s}
+.vcv.pick{border-color:var(--gold);background:rgba(241,196,15,.18);color:var(--gold);transform:scale(1.12);box-shadow:0 0 12px rgba(241,196,15,.4)}
+.vcv.inopt{outline:2px dashed var(--green);outline-offset:3px}
+.vcedges{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:6px}
+.vce{display:flex;align-items:center;gap:12px;padding:7px 14px;background:rgba(15,15,39,.85);border:1.5px solid var(--border);border-radius:9px;font-family:Consolas,monospace;font-size:.84rem;animation:pop .25s;transition:all .3s}
+.vce .vcen{flex:1;color:var(--text)}
+.vce .vces{font-size:.66rem;color:var(--dim);font-family:Inter,"Segoe UI",Arial,sans-serif}
+.vce.cov{border-color:rgba(72,208,176,.55)}
+.vce.cov .vcen{color:var(--green)}
+.vce.cur{border-color:var(--gold);background:rgba(241,196,15,.09);box-shadow:0 0 9px rgba(241,196,15,.25)}
+.vccover{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:14px;min-height:34px}
+/* set cover */
+.urow{display:flex;gap:8px;justify-content:center;margin-bottom:16px;flex-wrap:wrap}
+.ue{width:46px;height:46px;border-radius:10px;background:#1a1d3e;border:1.5px solid #34495e;display:flex;align-items:center;justify-content:center;font-weight:800;font-family:Consolas,monospace;font-size:.95rem;color:#9aa3b5;transition:all .3s;animation:pop .25s}
+.ue.cov{border-color:var(--green);background:rgba(72,208,176,.16);color:var(--green)}
+.ue.newc{border-color:var(--gold);background:rgba(241,196,15,.26);color:var(--gold);transform:scale(1.18);box-shadow:0 0 12px rgba(241,196,15,.45)}
+.srows{max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:8px}
+.srow{display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(15,15,39,.85);border:1.5px solid var(--border);border-radius:10px;animation:pop .25s;transition:all .3s}
+.srow .sn{width:34px;font-weight:800;color:var(--accent);font-family:Consolas,monospace;font-size:.88rem}
+.srow .smem{display:flex;gap:5px;flex:1;flex-wrap:wrap}
+.mchip{padding:3px 8px;border-radius:6px;background:#101426;border:1px solid #34495e;font-size:.72rem;font-family:Consolas,monospace;color:#9aa3b5}
+.mchip.cov{border-color:rgba(72,208,176,.45);color:rgba(72,208,176,.85);text-decoration:line-through}
+.mchip.newc{border-color:var(--gold);color:var(--gold);background:rgba(241,196,15,.15);text-decoration:none}
+.srow .snew{font-size:.68rem;color:var(--dim);width:84px;text-align:right;font-family:Inter,"Segoe UI",Arial,sans-serif}
+.srow .snew b{color:var(--gold)}
+.srow.pick{border-color:var(--gold);background:rgba(241,196,15,.08)}
+.srow.pick .sn{color:var(--gold)}
+.srow.scoring{border-color:var(--accent)}
+.srow.inopt{border-color:rgba(72,208,176,.55)}
+@media(max-width:600px){.home h1{font-size:1.5rem}.cards{grid-template-columns:1fr}.viz{padding:14px}.btn{padding:8px 16px;font-size:.78rem}.fgrid{grid-template-columns:repeat(4,1fr)}.fnode{width:64px;height:54px;font-size:.8rem}.fedge{font-size:.7rem}.vcv{width:44px;height:44px}}
+
+/* AlgoLab learning panels: consistent typography, theory and properly indented code */
+.ads-learning{margin:16px 0 22px;position:relative;z-index:1;font-family:Inter,"Segoe UI",Arial,sans-serif;color:var(--text)}
+.ads-learning .learn-head{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:12px;padding:15px 17px;border:1px solid var(--border);border-radius:12px;background:rgba(10,10,46,.92)}
+.ads-learning .learn-head h3{font-size:18px;line-height:1.35;color:var(--accent);margin:0}
+.ads-learning .learn-head label{font-size:13px;font-weight:700;color:var(--dim);display:flex;align-items:center;gap:8px}
+.ads-learning select{background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:7px;padding:7px 9px;font-family:inherit;font-size:13px}
+.ads-learning .learn-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.ads-learning .learn-card{min-width:0;border:1px solid var(--border);border-radius:12px;padding:15px;background:rgba(10,10,46,.84)}
+.ads-learning .learn-card h4{font-size:15px;line-height:1.4;color:var(--accent);margin:0 0 8px}
+.ads-learning .learn-card p,.ads-learning .learn-card li{font-size:14px;line-height:1.65;color:#c3ccda}
+.ads-learning .learn-card ul{padding-left:20px;margin:0}
+.ads-learning .complexity{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+.ads-learning .complexity span{font-size:12px;padding:5px 8px;border:1px solid rgba(0,212,255,.25);background:rgba(0,212,255,.07);border-radius:7px;color:var(--accent)}
+.ads-learning pre{margin:0;max-width:100%;overflow:auto;background:#07111d;border:1px solid #26394d;border-radius:9px;padding:12px;tab-size:4;white-space:pre}
+.ads-learning code{font:12px/1.65 Consolas,"SFMono-Regular",monospace;color:#e5edf5}
+.ads-learning .code-note{font-size:12px;color:var(--dim);margin-top:8px}
+@media(max-width:760px){.ads-learning .learn-grid{grid-template-columns:1fr}.ads-learning .learn-head{align-items:flex-start}}
+
+</style>
+
+<style id="shared-shell-style">
+/* Shared navigation shell; the original educational canvas and simulation styles remain page-specific. */
+.shared-shell{min-height:100vh;display:flex;align-items:stretch;background:var(--ui-bg,#07111d);color:var(--ui-text,#f5f7fa)}
+.shared-sidebar{width:255px;flex:0 0 255px;background:#081523;border-right:1px solid var(--ui-line,#24425d);padding:24px 16px;display:flex;flex-direction:column;gap:12px;min-height:100vh;position:sticky;top:0;height:100vh;overflow:auto;z-index:100}
+.shared-brand{display:flex;gap:12px;align-items:center;padding:4px 8px 20px;text-decoration:none;color:inherit}
+.shared-brand-mark{width:40px;height:40px;flex:0 0 40px;border-radius:12px;background:linear-gradient(135deg,#22d3ee,#2385f2);display:grid;place-items:center;font-size:22px;font-weight:800;color:#07111d}
+.shared-brand b{display:block;font-size:19px;line-height:1.2;color:var(--ui-text,#f5f7fa)}
+.shared-brand small{display:block;font-size:11px;color:var(--ui-muted,#8ea6bb);margin-top:3px}
+.shared-home{display:block;text-decoration:none;padding:10px 12px;border:1px solid var(--ui-line,#24425d);border-radius:9px;color:var(--ui-muted,#8ea6bb);font-size:13px}
+.shared-home:hover{color:var(--ui-text,#f5f7fa);border-color:var(--ui-accent,#22d3ee)}
+.shared-side-title{font-size:10px;letter-spacing:1.5px;color:var(--ui-muted,#8ea6bb);font-weight:800;padding:8px 10px 2px}
+.shared-nav{display:flex;flex-direction:column;gap:3px}
+.shared-nav .nav-item{display:block;text-decoration:none;width:100%;border:1px solid transparent;background:transparent;color:var(--ui-muted,#8ea6bb);text-align:left;padding:9px 11px;border-radius:9px;margin:0;font:600 12px/1.35 var(--ui-font,Inter,"Segoe UI",Arial,sans-serif)}
+.shared-nav .nav-item:hover{background:var(--ui-panel-2,#102a43);color:var(--ui-text,#f5f7fa)}
+.shared-nav .nav-item.active{background:var(--ui-panel-2,#102a43);border-color:var(--ui-line,#24425d);color:var(--ui-text,#f5f7fa)}
+.shared-nav .nav-item small{display:block;color:var(--ui-muted,#8ea6bb);font-size:10px;font-weight:400;margin-top:3px}
+.shared-theme{width:100%;min-height:38px;border:1px solid var(--ui-line,#24425d);border-radius:9px;background:var(--ui-panel-2,#102a43);color:var(--ui-text,#f5f7fa);font:700 12px/1.2 var(--ui-font,Inter,"Segoe UI",Arial,sans-serif);padding:9px 11px;text-align:left;cursor:pointer}
+.shared-note{margin-top:auto;border:1px solid var(--ui-line,#24425d);background:var(--ui-panel,#0b1b2b);padding:12px;border-radius:12px;color:var(--ui-muted,#8ea6bb);font-size:12px}
+.shared-note b{color:var(--ui-accent,#22d3ee)}.shared-note p{margin:6px 0 0;font-size:12px;line-height:1.5}
+.shared-main{flex:1;min-width:0;width:calc(100% - 255px);padding:20px 26px;}
+body[data-theme="light"] .shared-shell{background:var(--ui-bg,#f2f6fa);color:var(--ui-text,#102033)}
+body[data-theme="light"] .shared-sidebar{background:#fff;border-color:var(--ui-line,#b7c7d6)}
+body[data-theme="light"] .shared-brand b{color:#152235}
+body[data-theme="light"] .shared-home,body[data-theme="light"] .shared-nav .nav-item{color:#465d73}
+body[data-theme="light"] .shared-nav .nav-item.active{background:#edf3f7;color:#152235;border-color:#b7c7d6}
+body[data-theme="light"] .shared-theme{background:#f7fafc;color:#102033;border-color:#b7c7d6}
+@media(max-width:900px){.shared-shell{display:block}.shared-sidebar{position:relative;width:100%;height:auto;min-height:0;max-height:none;overflow:visible;padding:12px;gap:8px;border-right:0;border-bottom:1px solid var(--ui-line,#24425d)}.shared-brand{padding:2px 4px 8px}.shared-nav{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:5px}.shared-note{display:none}.shared-main{width:100%;padding:14px}}
+</style>
+<link rel="stylesheet" href="design-system.css">
+<link rel="stylesheet" href="enhance.css"></head>
+<body data-theme="dark">
+<div class="shared-shell" id="sharedAlgoLabShell">
+<aside class="shared-sidebar" aria-label="AlgoLab navigation">
+<a class="shared-brand" href="index.html"><span class="shared-brand-mark">A</span><span><b>AlgoLab</b><small>INTERACTIVE LEARNING STUDIO</small></span></a>
+<a class="shared-home" href="index.html">← All learning labs</a>
+<div class="shared-side-title">LEARNING LABS</div>
+<nav class="shared-nav" id="sharedAlgoLabNav" aria-label="Learning labs"><a class="nav-item" href="sorting.html" ><span>Sorting Algorithms</span><small>Core algorithm lab</small></a><a class="nav-item" href="searching.html"><span>Searching Algorithms</span><small>Array, tree and graph search</small></a><a class="nav-item" href="greedy.html" ><span>Greedy Algorithms</span><small>Optimization strategies</small></a><a class="nav-item" href="dp.html" ><span>Dynamic Programming</span><small>Subproblems and recurrence</small></a><a class="nav-item" href="graph.html" ><span>Graph Algorithms</span><small>Traversal and graph structure</small></a><a class="nav-item" href="data-structures.html"><span>Data Structures</span><small>Foundational structures</small></a><a class="nav-item" href="hanoi.html" ><span>Tower of Hanoi</span><small>Recursion and puzzles</small></a><a class="nav-item" href="string-matching.html" ><span>String Matching</span><small>Text and pattern algorithms</small></a><a class="nav-item" href="backtracking.html" ><span>Backtracking Algorithms</span><small>Search and constraints</small></a><a class="nav-item" href="branch-bound.html" ><span>Branch and Bound</span><small>Exact optimization</small></a><a class="nav-item" href="advanced-data-structures.html" ><span>Advanced Data Structures</span><small>Trees, queries and sets</small></a><a class="nav-item" href="cryptography-math.html" ><span>Cryptography & Mathematical Algorithms</span><small>Number theory and security</small></a><a class="nav-item active" href="advanced-network-flows.html" aria-current="page"><span>Advanced Network Flows & Approximation</span><small>Flows and approximation</small></a></nav>
+<button type="button" class="shared-theme" id="themeToggle" aria-label="Switch theme">☾ Dark theme</button>
+<div class="shared-note"><b>Learning mode</b><p>Explore the visualizer, follow the steps, review the theory, and study the implementation examples.</p></div>
+</aside>
+<div class="shared-main" id="sharedMainContent">
+<div class="bg"><div class="orb"></div><div class="orb"></div><div class="orb"></div></div>
+<div class="header"><div class="logo">Network Flows &amp; Approximation</div><button class="back-btn" id="backBtn"> Home</button><div class="sub">Interactive Visualizer</div></div>
+
+<div class="home" id="homeScreen">
+<h1>Advanced Network Flows &amp; Approximation</h1>
+<p class="tag">NP-hard optimization and constraint-heavy flow problems with provable guarantees</p>
+<div class="cards">
+<div class="card" data-a="0"><div class="ico"> </div><h3>Ford-Fulkerson Algorithm</h3><p>Maximum flow via DFS augmenting paths: push bottleneck flow along each path found in the residual network until no s-to-t path remains.</p><div class="tags"><span class="tag">Max flow</span><span class="tag p">DFS augment</span><span class="tag r">O(E · |f*|)</span></div></div>
+<div class="card" data-a="1"><div class="ico"> </div><h3>Edmonds-Karp Algorithm</h3><p>Ford-Fulkerson powered by BFS: always augment along the shortest residual path, guaranteeing O(VE²) convergence regardless of capacities.</p><div class="tags"><span class="tag">BFS shortest path</span><span class="tag p">Levels shown</span><span class="tag g">O(VE²)</span></div></div>
+<div class="card" data-a="2"><div class="ico"> </div><h3>Vertex Cover Approximation</h3><p>NP-hard minimum cover mapped to linear time: take both endpoints of every uncovered edge and compare the result against brute-force OPT.</p><div class="tags"><span class="tag">NP-hard</span><span class="tag p">2-approximation</span><span class="tag g">O(E)</span></div></div>
+<div class="card" data-a="3"><div class="ico"> </div><h3>Greedy Set Cover</h3><p>NP-complete intersection problem: repeatedly select the set covering the most still-uncovered elements - bounded by the harmonic number H(n).</p><div class="tags"><span class="tag">NP-complete</span><span class="tag p">H(n)-approx</span><span class="tag r">Greedy scan</span></div></div>
+</div>
+</div>
+
+<div class="algo" id="algoScreen" style="display:none">
+
+<!-- 0: FORD-FULKERSON -->
+<div class="panel on" id="p0">
+<div class="algo-head"><h2>Ford-Fulkerson - Max Flow (DFS)</h2><p>CLRS network: 6 nodes, 10 edges - max flow = 23</p></div>
+<div class="viz">
+<div class="legend"><span class="lg"><i style="background:#1a1d3e;border-color:#34495e"></i>node</span><span class="lg"><i style="background:rgba(241,196,15,.4)"></i>on augmenting path</span><span class="lg"><i style="background:rgba(0,212,255,.5)"></i>flow / capacity</span><span class="lg"><i style="background:rgba(72,208,176,.5)"></i>min-cut edge</span></div>
+<div class="sqwrap" id="ops0"></div>
+<div class="fgrid" id="fgraph0"></div>
+<div class="fpath" id="fpath0"></div>
+<div class="flevels" id="bfs0"></div>
+<div class="fedges" id="fedges0"></div>
+<div class="stats" id="stats0"></div>
+<div class="log" id="log0"></div>
+<div class="result" id="res0"></div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="prog0"></div></div>
+<div class="status" id="s0">Press Play or Step to begin</div>
+<div class="controls"><button class="btn b-play" id="play0"> Play</button><button class="btn b-step" id="step0">Next Step</button><button class="btn b-reset" id="reset0">Reset</button><div class="speed"><label>Speed</label><input type="range" min="150" max="1500" value="550" id="spd0"><span class="val" id="spdv0">0.55s</span></div></div>
+<div class="desc"><b>How:</b> while an augmenting path s &#8594; t exists in the <b>residual</b> network (forward slack + backward flow), find one with <b>DFS</b> and push its bottleneck. Reverse edges let the algorithm undo bad choices. Stops when the residual source is disconnected from t - by the max-flow min-cut theorem the flow equals the cheapest cut. <span class="cx">Time: O(E · max flow) - capacity dependent</span></div>
+<div class="ads-learning" id="flowLearn0"></div>
+</div>
+
+<!-- 1: EDMONDS-KARP -->
+<div class="panel" id="p1">
+<div class="algo-head"><h2>Edmonds-Karp - Max Flow (BFS)</h2><p>Same CLRS network - BFS picks the shortest augmenting path each round</p></div>
+<div class="viz">
+<div class="legend"><span class="lg"><i style="background:#1a1d3e;border-color:#34495e"></i>node</span><span class="lg"><i style="background:rgba(155,89,182,.5)"></i>BFS level frontier</span><span class="lg"><i style="background:rgba(241,196,15,.4)"></i>on shortest path</span><span class="lg"><i style="background:rgba(72,208,176,.5)"></i>min-cut edge</span></div>
+<div class="sqwrap" id="ops1"></div>
+<div class="fgrid" id="fgraph1"></div>
+<div class="fpath" id="fpath1"></div>
+<div class="flevels" id="bfs1"></div>
+<div class="fedges" id="fedges1"></div>
+<div class="stats" id="stats1"></div>
+<div class="log" id="log1"></div>
+<div class="result" id="res1"></div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="prog1"></div></div>
+<div class="status" id="s1">Press Play or Step to begin</div>
+<div class="controls"><button class="btn b-play" id="play1"> Play</button><button class="btn b-step" id="step1">Next Step</button><button class="btn b-reset" id="reset1">Reset</button><div class="speed"><label>Speed</label><input type="range" min="150" max="1500" value="550" id="spd1"><span class="val" id="spdv1">0.55s</span></div></div>
+<div class="desc"><b>How:</b> Edmonds-Karp = Ford-Fulkerson with the path chosen by <b>BFS</b>, i.e. the fewest-edge residual path (levels L0, L1, ... shown each round). Proving each augmentation raises the shortest-path distance gives the fixed bound <b>O(VE&#178;)</b> - no dependence on how large the capacities are. <span class="cx">Time: O(VE²) | Space: O(E)</span></div>
+<div class="ads-learning" id="flowLearn1"></div>
+</div>
+
+<!-- 2: VERTEX COVER -->
+<div class="panel" id="p2">
+<div class="algo-head"><h2>Vertex Cover Approximation (2-approx)</h2><p>8 vertices, 9 edges - NP-hard optimum vs linear-time greedy</p></div>
+<div class="viz">
+<div class="legend"><span class="lg"><i style="background:#1a1d3e;border-color:#34495e"></i>vertex</span><span class="lg"><i style="background:rgba(241,196,15,.35)"></i>picked into cover</span><span class="lg"><i style="background:rgba(72,208,176,.5)"></i>edge covered</span><span class="lg"><i style="border:2px dashed #48d0b0;background:transparent"></i>in brute-force OPT</span></div>
+<div class="sqwrap" id="ops2"></div>
+<div class="vcverts" id="vcVerts"></div>
+<div class="vcedges" id="vcEdges"></div>
+<div class="vccover" id="vcCover"></div>
+<div class="stats" id="stats2"></div>
+<div class="log" id="log2"></div>
+<div class="result" id="res2"></div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="prog2"></div></div>
+<div class="status" id="s2">Press Play or Step to begin</div>
+<div class="controls"><button class="btn b-play" id="play2"> Play</button><button class="btn b-step" id="step2">Next Step</button><button class="btn b-reset" id="reset2">Reset</button><div class="speed"><label>Speed</label><input type="range" min="150" max="1500" value="550" id="spd2"><span class="val" id="spdv2">0.55s</span></div></div>
+<div class="desc"><b>How:</b> minimum vertex cover is NP-hard, so take every edge in order; if it is not yet covered, add <b>both</b> of its endpoints. Each addition is charged to a vertex an optimal cover would need anyway &#8658; |greedy| &#8804; 2 &#183; OPT - a <b>2-approximation</b> in one linear pass. Brute force over all 2&#8319; subsets supplies the true OPT for comparison. <span class="cx">Time: O(E + 2&#8319; &#183; n) for OPT check | guarantee: ratio &#8804; 2</span></div>
+<div class="ads-learning" id="flowLearn2"></div>
+</div>
+
+<!-- 3: GREEDY SET COVER -->
+<div class="panel" id="p3">
+<div class="algo-head"><h2>Greedy Set Cover (H(n)-approx)</h2><p>Universe of 6 elements, 5 sets - greedy vs brute-force optimum</p></div>
+<div class="viz">
+<div class="legend"><span class="lg"><i style="background:#1a1d3e;border-color:#34495e"></i>element</span><span class="lg"><i style="background:rgba(72,208,176,.4)"></i>covered</span><span class="lg"><i style="background:rgba(241,196,15,.5)"></i>covered this pick</span><span class="lg"><i style="background:rgba(0,212,255,.35)"></i>scored this round</span></div>
+<div class="sqwrap" id="ops3"></div>
+<div class="urow" id="uRow"></div>
+<div class="srows" id="sRows"></div>
+<div class="stats" id="stats3"></div>
+<div class="log" id="log3"></div>
+<div class="result" id="res3"></div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="prog3"></div></div>
+<div class="status" id="s3">Press Play or Step to begin</div>
+<div class="controls"><button class="btn b-play" id="play3"> Play</button><button class="btn b-step" id="step3">Next Step</button><button class="btn b-reset" id="reset3">Reset</button><div class="speed"><label>Speed</label><input type="range" min="150" max="1500" value="550" id="spd3"><span class="val" id="spdv3">0.55s</span></div></div>
+<div class="desc"><b>How:</b> every round, score each set by how many <b>still-uncovered</b> elements it would add and take the best (ties break by index). The classic trap set S3 grabs 4 elements first but forces a third set - greedy returns 3 where OPT needs only 2. Analysis bounds greedy &#8804; H(n) &#183; OPT (H(6) &#8776; 2.45), the best poly-time ratio unless P = NP. <span class="cx">Time: O(n &#183; m) | guarantee: ratio &#8804; H(n) &#8776; ln n</span></div>
+<div class="ads-learning" id="flowLearn3"></div>
+</div>
+
+</div>
+<div class="confetti" id="confetti"></div>
+<script src="advanced-network-flows-algorithms.js"></script>
+<script src="advanced-network-flows-learning.js"></script>
+</div></div>
+<script src="theme.js"></script>
+<script src="enhance.js" defer></script></body>
+</html>
